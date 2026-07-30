@@ -42,6 +42,10 @@ a {
   text-decoration: none;
 }
 
+input, button, textarea, select {
+  font: inherit;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

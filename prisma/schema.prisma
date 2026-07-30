@@ -7,21 +7,92 @@ datasource db {
 }
 
 model User {
-  id           Int    @id @default(autoincrement())
-  email        String @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
   passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         Role       @default(ADMIN)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  posts        BlogPost[]
+
+  @@index([role])
+}
+
+enum Role {
+  ADMIN
+  EDITOR
 }
 
 model Project {
-  id          Int     @id @default(autoincrement())
-  slug        String  @unique
-  title       Json
-  description Json
-  content     Json?   
-  image       String? 
-  published   Boolean @default(false)
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  subtitle    String?
+  description String?  @default("")
+  content     String?
+  heroImage   String?
+  bgImage     String?
+  imageUrl    String?
+  benefits    String[] @default([])
+  useCases    String?
+  tags        String[] @default([])
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([published, order])
+  @@index([slug])
+}
+
+model HeroSlide {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  imageAlt  String?
+  title     String?
+  subtitle  String?
+  ctaText   String?
+  ctaLink   String?
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  headline  String
+  body      String
+  author    String?
+  role      String?
+  avatarUrl String?
+  rating    Int      @default(5)
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String?
+  content     String
+  imageUrl    String?
+  authorId    String?
+  author      User?    @relation(fields: [authorId], references: [id])
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+  tags        String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, publishedAt])
+  @@index([slug])
 }
