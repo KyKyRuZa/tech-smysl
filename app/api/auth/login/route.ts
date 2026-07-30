@@ -1,26 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { loginSchema } from '@/lib/validation/schemas'
-import { encrypt } from '@/lib/auth/session'
-import { UnauthorizedError, AppError } from '@/lib/errors'
+import { createSession } from '@/lib/auth/session'
+import { UnauthorizedError } from '@/lib/errors'
 import bcrypt from 'bcrypt'
-import { cookies } from 'next/headers'
 import { logger } from '@/lib/logger'
+import { validateBody } from '@/lib/auth/middleware'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const validated = loginSchema.safeParse(body)
-
-    if (!validated.success) {
-      logger.warn('Login validation failed', { errors: validated.error.flatten().fieldErrors })
-      return NextResponse.json(
-        { error: 'Validation failed', details: validated.error.flatten().fieldErrors },
-        { status: 400 }
-      )
+    const validation = validateBody(loginSchema, body)
+    if (!validation.success) {
+      logger.warn('Login validation failed', { errors: validation.response.json() })
+      return validation.response
     }
 
-    const { email, password } = validated.data
+    const { email, password } = validation.data
     const user = await prisma.user.findUnique({
       where: { email },
       select: { id: true, email: true, passwordHash: true, role: true },
@@ -38,20 +34,7 @@ export async function POST(req: NextRequest) {
       throw new UnauthorizedError('Invalid credentials')
     }
 
-    const session = encrypt({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    })
-
-    const cookieStore = await cookies()
-    cookieStore.set('session', session, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      sameSite: 'lax',
-      path: '/',
-    })
+    await createSession(user.id, user.email, user.role)
 
     logger.info('User logged in', { userId: user.id, email, role: user.role })
 
@@ -63,7 +46,7 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error) {
-    if (error instanceof AppError) {
+    if (error instanceof UnauthorizedError) {
       return NextResponse.json({ error: error.message }, { status: error.statusCode })
     }
     logger.error('Login unexpected error', { error })

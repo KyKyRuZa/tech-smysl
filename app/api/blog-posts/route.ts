@@ -5,6 +5,8 @@ import { blogPostSchema } from '@/lib/validation/schemas'
 import { toSlug } from '@/lib/slug'
 import { NotFoundError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
+import { blogPostSelect, ensureSlugUnique } from '@/lib/api/helpers'
+import { validateBody } from '@/lib/auth/middleware'
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,19 +15,7 @@ export async function GET(req: NextRequest) {
     const items = await prisma.blogPost.findMany({
       where: all ? {} : { published: true },
       orderBy: { publishedAt: 'desc' },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        excerpt: true,
-        content: true,
-        imageUrl: true,
-        published: true,
-        publishedAt: true,
-        tags: true,
-        createdAt: true,
-        author: { select: { email: true } },
-      },
+      select: blogPostSelect,
     })
     logger.info('BlogPosts fetched', { count: items.length, all })
     return NextResponse.json({ data: items })
@@ -41,21 +31,17 @@ export async function POST(req: NextRequest) {
     if (payload instanceof NextResponse) return payload
 
     const body = await req.json()
-    const validated = blogPostSchema.safeParse(body)
-
-    if (!validated.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: validated.error.flatten().fieldErrors },
-        { status: 400 }
-      )
+    const validation = validateBody(blogPostSchema, body)
+    if (!validation.success) {
+      return validation.response
     }
 
-    const data = validated.data
+    const data = validation.data
     const slug = data.slug?.trim() || toSlug(data.title)
 
-    const existing = await prisma.blogPost.findUnique({ where: { slug } })
-    if (existing) {
-      return NextResponse.json({ error: 'Blog post with this slug already exists' }, { status: 409 })
+    const slugCheck = await ensureSlugUnique('blogPost', slug)
+    if (!slugCheck.unique) {
+      return slugCheck.response
     }
 
     const created = await prisma.blogPost.create({

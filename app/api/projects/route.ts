@@ -5,6 +5,7 @@ import { projectSchema } from '@/lib/validation/schemas'
 import { toSlug } from '@/lib/slug'
 import { NotFoundError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
+import { ensureSlugUnique } from '@/lib/api/helpers'
 
 export async function GET(req: NextRequest) {
   try {
@@ -40,9 +41,9 @@ export async function POST(req: NextRequest) {
     const data = validated.data
     const slug = data.slug?.trim() || toSlug(data.title)
 
-    const existing = await prisma.project.findUnique({ where: { slug } })
-    if (existing) {
-      return NextResponse.json({ error: 'Project with this slug already exists' }, { status: 409 })
+    const slugCheck = await ensureSlugUnique('project', slug)
+    if (!slugCheck.unique) {
+      return slugCheck.response
     }
 
     const created = await prisma.project.create({

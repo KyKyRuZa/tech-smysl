@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth/require-auth'
 import { heroSlideSchema } from '@/lib/validation/schemas'
 import { logger } from '@/lib/logger'
+import { validateBody } from '@/lib/auth/middleware'
 
 export async function GET(req: NextRequest) {
   try {
@@ -26,17 +27,13 @@ export async function POST(req: NextRequest) {
     if (payload instanceof NextResponse) return payload
 
     const body = await req.json()
-    const validated = heroSlideSchema.safeParse(body)
-
-    if (!validated.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: validated.error.flatten().fieldErrors },
-        { status: 400 }
-      )
+    const validation = validateBody(heroSlideSchema, body)
+    if (!validation.success) {
+      return validation.response
     }
 
     const created = await prisma.heroSlide.create({
-      data: validated.data,
+      data: validation.data,
     })
 
     logger.info('HeroSlide created', { heroSlideId: created.id })

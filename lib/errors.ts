@@ -8,7 +8,6 @@ export class AppError extends Error {
     public isOperational: boolean = true
   ) {
     super(message)
-    Object.setPrototypeOf(this, AppError.prototype)
   }
 }
 
