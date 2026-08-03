@@ -9,10 +9,6 @@ const nextConfig: NextConfig = {
 
   serverExternalPackages: ["sharp", "@prisma/client", "bcrypt", "ioredis", "pg"],
 
-  images: {
-    formats: ["image/avif", "image/webp"],
-  },
-
   headers: async () => {
     return [
       {

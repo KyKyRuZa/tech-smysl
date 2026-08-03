@@ -1,0 +1,144 @@
+.caseStudy {
+  background: var(--white);
+  padding: 80px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.caseStudy::before {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  left: -100px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(192, 57, 43, 0.3) 0%, transparent 65%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.caseStudyInner {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.caseStudyHead {
+  margin-bottom: 48px;
+  max-width: 640px;
+}
+
+.caseStudyTitle {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--black);
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  line-height: 1.1;
+}
+
+.caseStudySubtitle {
+  font-size: 15px;
+  color: var(--gray-light);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.caseStudyTagline {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(232, 67, 58, 0.1);
+  padding: 6px 14px;
+  border-radius: 50px;
+}
+
+.caseStudyMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+.metric {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.metricValue {
+  display: block;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--black);
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+  font-family: var(--mono);
+}
+
+.metricLabel {
+  font-size: 13px;
+  color: var(--gray-light);
+  line-height: 1.4;
+}
+
+.caseStudyTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.tag {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-light);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 14px;
+  border-radius: 50px;
+}
+
+.caseStudyCta {
+  margin-top: 8px;
+}
+
+.animateIn {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.animateIn.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+  .caseStudyMetrics {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .metricValue {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .caseStudy {
+    padding: 60px 24px;
+  }
+  .caseStudyTitle {
+    font-size: 32px;
+  }
+  .caseStudyMetrics {
+    grid-template-columns: 1fr;
+  }
+}

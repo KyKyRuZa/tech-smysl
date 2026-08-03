@@ -1,0 +1,112 @@
+'use client';
+
+import { useInView } from '@/hooks/useInView';
+import styles from './Testimonials.module.css';
+
+interface Testimonial {
+  headline: string;
+  body: string;
+  author: string;
+  role: string;
+}
+
+const ITEMS: Testimonial[] = [
+  {
+    headline: 'Корпоративный портал: 500+ сотрудников, 0 багов в продакшене',
+    body: 'Тех Смысл реализовала внутренний портал за 45 дней. Оперативная доставка, чистая архитектура, стабильная работа. +35% производительности команды.',
+    author: 'Руководитель цифровой трансформации',
+    role: 'Корпоративный клиент',
+  },
+  {
+    headline: 'MVP стартапа: инвестиции привлечены, приложение в App Store',
+    body: 'Разработали React-приложение с AI-функциями за 6 недель. Вышли на рынок, привлекли 2.5 млн ₽ инвестиций. Сэкономили клиенту 400 тыс. ₽.',
+    author: 'CEO стартапа',
+    role: 'Технологический сектор',
+  },
+  {
+    headline: 'Миграция в облако AWS: без простоя 99,9% времени',
+    body: 'Перешли инфраструктуру на AWS, настроили Kubernetes и CI/CD. Downtime — нулевой, поддержка круглосуточная. –30% на инфраструктурные расходы.',
+    author: 'CTO',
+    role: 'Финтех компания',
+  },
+  {
+    headline: 'Мобильное приложение: 5★ из 5, 10 000+ скачиваний',
+    body: 'Flutter-приложение собрало сотни положительных отзывов. Чистый код, отзывчивый интерфейс. +70% удержание пользователей.',
+    author: 'Продукт-менеджер',
+    role: 'Ритейл',
+  },
+];
+
+interface TestimonialsProps {
+  items?: Testimonial[];
+}
+
+const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems }) => {
+  const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
+  const items = externalItems ?? ITEMS;
+
+  return (
+    <section className={styles.testimonials}>
+      <div className={styles.testimonialsInner}>
+        <div className={styles.testimonialsHead} ref={headRef}>
+          <div>
+            <h2
+              className={`${styles.testimonialsTitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
+            >
+              Истории успеха
+              <br />
+              от 50+ клиентов
+            </h2>
+          </div>
+          <div
+            className={`${styles.testimonialsNoteWrap} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
+            style={{ transitionDelay: '0.1s' }}
+          >
+            <span className={styles.testimonialsStar}>★ 4.8</span>
+            <p className={styles.testimonialsNote}>
+              Более 50 успешных проектов по веб-разработке, мобильным приложениям и AI
+            </p>
+          </div>
+        </div>
+
+        <div className={styles.tAllBtn}>
+          <a href="#" className="btn-outline-sm">
+            Все отзывы
+          </a>
+        </div>
+
+        <div className={styles.testimonialsGrid}>
+          {items.map((item, i) => (
+            <TestimonialCard key={i} item={item} index={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+function TestimonialCard({ item, index }: { item: Testimonial; index: number }) {
+  const { ref, isInView } = useInView({ threshold: 0.1 });
+
+  return (
+    <div
+      ref={ref}
+      className={`${styles.tCard} ${styles.animateIn} ${isInView ? styles.visible : ''}`}
+      style={{ transitionDelay: `${index * 0.08}s` }}
+    >
+      <div className={styles.tCardText}>
+        {item.headline}
+        <span>{item.body}</span>
+      </div>
+      <div className={styles.tAuthor}>
+        <div className={styles.tAvatar} />
+        <div>
+          <p className={styles.tName}>{item.author}</p>
+          <p className={styles.tRole}>{item.role}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Testimonials;
