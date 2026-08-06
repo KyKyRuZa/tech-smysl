@@ -42,14 +42,32 @@ const DEFAULT_HERO_SLIDES = [
   },
 ];
 
-export default function Hero({ slides }: { slides?: HeroSlideData[] }) {
+interface HeroProps {
+  slides?: HeroSlideData[];
+  editable?: boolean;
+  activeIndex?: number;
+  onActiveChange?: (index: number) => void;
+  onEdit?: () => void;
+}
+
+export default function Hero({
+  slides,
+  editable = false,
+  activeIndex = 0,
+  onActiveChange,
+  onEdit,
+}: HeroProps) {
   const HERO_SLIDES: HeroSlideData[] = slides && slides.length > 0 ? slides : DEFAULT_HERO_SLIDES;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [imageFade, setImageFade] = useState(true);
 
+  const active = editable ? activeIndex : currentSlide;
+  const currentSlideData = HERO_SLIDES[active];
+
   useEffect(() => {
+    if (editable) return;
     let timeout: ReturnType<typeof setTimeout>;
 
     const texts = HERO_SLIDES.map((s) => s.subtitle || '');
@@ -83,20 +101,24 @@ export default function Hero({ slides }: { slides?: HeroSlideData[] }) {
     return () => clearTimeout(timeout);
   }, [displayText, isTyping, currentSlide]);
 
-  const currentSlideData = HERO_SLIDES[currentSlide];
+  const subtitleText = editable ? currentSlideData?.subtitle || '' : displayText;
 
   return (
-    <section className={styles.hero}>
+    <section
+      className={`${styles.hero} ${editable ? styles.heroEditable : ''}`}
+      onClick={editable ? onEdit : undefined}
+    >
       <div className={styles.heroImage}>
         {currentSlideData && (
           <Image
             src={currentSlideData.imageUrl}
             alt={currentSlideData.imageAlt || ''}
-            className={`${styles.heroImg} ${imageFade ? '' : styles.fadeOut}`}
+            className={styles.heroImg}
             width={1920}
             height={1080}
             fetchPriority="high"
             decoding="async"
+            priority={editable}
           />
         )}
       </div>
@@ -110,7 +132,7 @@ export default function Hero({ slides }: { slides?: HeroSlideData[] }) {
 
           <h1 className={styles.heroTitle}>Техсмысл: +30 IT-решений ежегодно</h1>
 
-          <p className={styles.heroSub}>{displayText}</p>
+          <p className={styles.heroSub}>{subtitleText}</p>
 
           <div className={styles.heroActions}>
             <button type="button" className={styles.btnRed}>
@@ -120,6 +142,35 @@ export default function Hero({ slides }: { slides?: HeroSlideData[] }) {
           </div>
         </div>
       </div>
+
+      {editable && (
+        <>
+          <div className={styles.heroEditBadge}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+            Редактировать слайд {active + 1}
+          </div>
+
+          {HERO_SLIDES.length > 1 && (
+            <div
+              className={styles.heroEditDots}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {HERO_SLIDES.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={`${styles.heroEditDot} ${i === active ? styles.heroEditDotActive : ''}`}
+                  aria-label={`Слайд ${i + 1}`}
+                  onClick={() => onActiveChange?.(i)}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </section>
   );
 }

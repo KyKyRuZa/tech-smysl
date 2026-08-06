@@ -1,9 +1,11 @@
 'use client';
 
 import { useInView } from '@/hooks/useInView';
+import EditableOverlay from '@/components/admin/EditableOverlay';
 import styles from './Testimonials.module.css';
 
 export interface Testimonial {
+  id?: string;
   headline: string;
   body: string;
   author: string;
@@ -39,9 +41,11 @@ const ITEMS: Testimonial[] = [
 
 interface TestimonialsProps {
   items?: Testimonial[];
+  editable?: boolean;
+  onEdit?: (item: Testimonial, index: number) => void;
 }
 
-const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems }) => {
+const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems, editable, onEdit }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
   const items = externalItems !== undefined ? externalItems : ITEMS;
 
@@ -80,7 +84,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems }) => 
             <p className={styles.empty}>Пока нет отзывов</p>
           ) : (
             items.map((item, i) => (
-              <TestimonialCard key={i} item={item} index={i} />
+              <TestimonialCard key={i} item={item} index={i} editable={editable} onEdit={onEdit} />
             ))
           )}
         </div>
@@ -89,14 +93,24 @@ const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems }) => 
   );
 };
 
-function TestimonialCard({ item, index }: { item: Testimonial; index: number }) {
+function TestimonialCard({
+  item,
+  index,
+  editable,
+  onEdit,
+}: {
+  item: Testimonial;
+  index: number;
+  editable?: boolean;
+  onEdit?: (item: Testimonial, index: number) => void;
+}) {
   const { ref, isInView } = useInView({ threshold: 0.1 });
 
   return (
     <div
       ref={ref}
-      className={`${styles.tCard} ${styles.animateIn} ${isInView ? styles.visible : ''}`}
-      style={{ transitionDelay: `${index * 0.08}s` }}
+      className={`${styles.tCard} ${styles.animateIn} ${editable || isInView ? styles.visible : ''}`}
+      style={editable ? { position: 'relative' } : undefined}
     >
       <div className={styles.tCardText}>
         {item.headline}
@@ -109,6 +123,7 @@ function TestimonialCard({ item, index }: { item: Testimonial; index: number }) 
           <p className={styles.tRole}>{item.role}</p>
         </div>
       </div>
+      {editable && <EditableOverlay onClick={() => onEdit?.(item, index)} />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useInView } from '@/hooks/useInView';
+import EditableOverlay from '@/components/admin/EditableOverlay';
 import styles from './Articles.module.css';
 
 export interface ArticleItem {
@@ -44,9 +45,11 @@ const ITEMS: ArticleItem[] = [
 
 interface ArticlesProps {
   items?: ArticleItem[];
+  editable?: boolean;
+  onEdit?: (item: ArticleItem, index: number) => void;
 }
 
-const Articles: React.FC<ArticlesProps> = ({ items: externalItems }) => {
+const Articles: React.FC<ArticlesProps> = ({ items: externalItems, editable, onEdit }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
   const items = externalItems !== undefined ? externalItems : ITEMS;
 
@@ -72,7 +75,7 @@ const Articles: React.FC<ArticlesProps> = ({ items: externalItems }) => {
             <p className={styles.empty}>Пока нет статей</p>
           ) : (
             items.map((item, i) => (
-              <ArticleCard key={item.id} item={item} index={i} />
+              <ArticleCard key={item.id} item={item} index={i} editable={editable} onEdit={onEdit} />
             ))
           )}
         </div>
@@ -81,14 +84,24 @@ const Articles: React.FC<ArticlesProps> = ({ items: externalItems }) => {
   );
 };
 
-function ArticleCard({ item, index }: { item: ArticleItem; index: number }) {
+function ArticleCard({
+  item,
+  index,
+  editable,
+  onEdit,
+}: {
+  item: ArticleItem;
+  index: number;
+  editable?: boolean;
+  onEdit?: (item: ArticleItem, index: number) => void;
+}) {
   const { ref, isInView } = useInView({ threshold: 0.1 });
 
   return (
     <article
       ref={ref}
-      className={`${styles.articleCard} ${styles.animateIn} ${isInView ? styles.visible : ''}`}
-      style={{ transitionDelay: `${index * 0.08}s` }}
+      className={`${styles.articleCard} ${styles.animateIn} ${editable || isInView ? styles.visible : ''}`}
+      style={editable ? { position: 'relative' } : undefined}
     >
       <span className={styles.readTime}>{item.readTime}</span>
       <h3 className={styles.articleTitle}>{item.title}</h3>
@@ -96,6 +109,7 @@ function ArticleCard({ item, index }: { item: ArticleItem; index: number }) {
       <a href={item.link} className={styles.articleLink}>
         Все статьи →
       </a>
+      {editable && <EditableOverlay onClick={() => onEdit?.(item, index)} />}
     </article>
   );
 }

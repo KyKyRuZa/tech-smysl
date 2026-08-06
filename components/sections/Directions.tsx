@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { useInView } from '@/hooks/useInView';
+import EditableOverlay from '@/components/admin/EditableOverlay';
 import styles from './Directions.module.css';
 
 export interface Project {
@@ -18,6 +19,8 @@ export interface Project {
 
 interface DirectionsProps {
   projects?: Project[];
+  editable?: boolean;
+  onEdit?: (project: Project, index: number) => void;
 }
 
 const PROJECTS: Project[] = [
@@ -77,7 +80,7 @@ const PROJECTS: Project[] = [
   },
 ];
 
-const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects }) => {
+const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects, editable, onEdit }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
 
@@ -113,7 +116,13 @@ const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects }) =
           ) : (
             <div className={styles.directionsGrid} ref={scrollRef}>
               {projects.map((project, i) => (
-                <ProjectCard key={project.id} project={project} index={i} />
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  index={i}
+                  editable={editable}
+                  onEdit={onEdit}
+                />
               ))}
             </div>
           )}
@@ -140,14 +149,24 @@ const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects }) =
   );
 };
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+function ProjectCard({
+  project,
+  index,
+  editable,
+  onEdit,
+}: {
+  project: Project;
+  index: number;
+  editable?: boolean;
+  onEdit?: (project: Project, index: number) => void;
+}) {
   const { ref, isInView } = useInView({ threshold: 0.1 });
 
   return (
     <article
       ref={ref}
-      className={`${styles.projectCard} ${styles.animateIn} ${isInView ? styles.visible : ''}`}
-      style={{ transitionDelay: `${index * 0.05}s` }}
+      className={`${styles.projectCard} ${styles.animateIn} ${editable || isInView ? styles.visible : ''}`}
+      style={editable ? { position: 'relative' } : undefined}
     >
       <Link
         href={`/projects/${project.slug || project.id}`}
@@ -173,6 +192,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           )}
         </div>
       </Link>
+      {editable && <EditableOverlay onClick={() => onEdit?.(project, index)} />}
     </article>
   );
 }

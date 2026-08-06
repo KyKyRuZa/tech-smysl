@@ -51,6 +51,13 @@ function NavIcon({ name }: { name: string }) {
           <path d="M3 9h18M9 21V9" />
         </svg>
       )
+    case 'editor':
+      return (
+        <svg {...common}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      )
     default:
       return null
   }
@@ -66,6 +73,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     { href: '/admin/projects', label: 'Проекты', icon: 'projects' },
     { href: '/admin/reviews', label: 'Отзывы', icon: 'reviews' },
     { href: '/admin/hero-slides', label: 'Слайды', icon: 'slides' },
+    { href: '/admin/edit', label: 'Редактор', icon: 'editor' },
   ]
 
   return (
