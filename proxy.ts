@@ -3,7 +3,7 @@ import { decrypt } from '@/lib/auth/session'
 import { logger } from '@/lib/logger'
 
 const protectedRoutes = ['/admin']
-const publicRoutes = ['/login', '/']
+const publicRoutes = ['/login']
 const apiAuthRoutes = ['/api/auth/login', '/api/auth/logout', '/api/health']
 
 const allowedOrigins = [
@@ -92,9 +92,11 @@ export async function proxy(req: NextRequest) {
 
   const isApiAuthRoute = apiAuthRoutes.some(route => pathname.startsWith(route))
   if (isApiAuthRoute) {
-    return NextResponse.next({
-      headers: corsHeaders,
-    })
+    const res = NextResponse.next()
+    for (const [key, value] of Object.entries(corsHeaders)) {
+      res.headers.set(key, value)
+    }
+    return res
   }
 
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
@@ -113,9 +115,11 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL('/admin', req.nextUrl))
   }
 
-  return NextResponse.next({
-    headers: corsHeaders,
-  })
+  const res = NextResponse.next()
+  for (const [key, value] of Object.entries(corsHeaders)) {
+    res.headers.set(key, value)
+  }
+  return res
 }
 
 export const config = {

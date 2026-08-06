@@ -3,7 +3,7 @@
 import { useInView } from '@/hooks/useInView';
 import styles from './Testimonials.module.css';
 
-interface Testimonial {
+export interface Testimonial {
   headline: string;
   body: string;
   author: string;
@@ -43,7 +43,7 @@ interface TestimonialsProps {
 
 const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
-  const items = externalItems ?? ITEMS;
+  const items = externalItems !== undefined ? externalItems : ITEMS;
 
   return (
     <section className={styles.testimonials}>
@@ -76,9 +76,13 @@ const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems }) => 
         </div>
 
         <div className={styles.testimonialsGrid}>
-          {items.map((item, i) => (
-            <TestimonialCard key={i} item={item} index={i} />
-          ))}
+          {items.length === 0 ? (
+            <p className={styles.empty}>Пока нет отзывов</p>
+          ) : (
+            items.map((item, i) => (
+              <TestimonialCard key={i} item={item} index={i} />
+            ))
+          )}
         </div>
       </div>
     </section>

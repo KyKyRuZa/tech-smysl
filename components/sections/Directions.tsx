@@ -81,7 +81,7 @@ const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects }) =
   const scrollRef = useRef<HTMLDivElement>(null);
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
 
-  const projects = externalProjects ?? PROJECTS;
+  const projects = externalProjects !== undefined ? externalProjects : PROJECTS;
 
   const scroll = (direction: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -108,11 +108,15 @@ const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects }) =
         </div>
 
         <div className={styles.directionsCarouselWrap}>
-          <div className={styles.directionsGrid} ref={scrollRef}>
-            {projects.map((project, i) => (
-              <ProjectCard key={project.id} project={project} index={i} />
-            ))}
-          </div>
+          {projects.length === 0 ? (
+            <p className={styles.empty}>Пока нет проектов</p>
+          ) : (
+            <div className={styles.directionsGrid} ref={scrollRef}>
+              {projects.map((project, i) => (
+                <ProjectCard key={project.id} project={project} index={i} />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className={styles.dirNav}>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth/require-auth'
-import { NotFoundError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 
 export function createGetHandler<T>(
@@ -15,7 +14,7 @@ export function createGetHandler<T>(
     const item = await findFn(id)
 
     if (!item) {
-      throw new NotFoundError(notFoundMessage)
+      return NextResponse.json({ error: notFoundMessage }, { status: 404 })
     }
 
     return NextResponse.json({ data: item })
@@ -29,6 +28,7 @@ export function createPutHandler<TData, TEntity extends { id: string }>(
     validate: (body: unknown) => { success: boolean; data?: TData; error?: unknown }
     notFoundMessage: string
     logKey: string
+    slugCheck?: (slug: string, id: string) => Promise<NextResponse | null>
   }
 ) {
   return async (
@@ -43,9 +43,13 @@ export function createPutHandler<TData, TEntity extends { id: string }>(
     const validated = options.validate(body)
 
     if (!validated.success || !validated.data) {
-      const details = validated.error instanceof Error
-        ? validated.error.message
-        : 'Validation failed'
+      const error = validated.error
+      const details =
+        error && typeof error === 'object' && 'flatten' in error && typeof (error as { flatten?: unknown }).flatten === 'function'
+          ? (error as { flatten: () => unknown }).flatten()
+          : error instanceof Error
+            ? error.message
+            : 'Validation failed'
       return NextResponse.json(
         { error: 'Validation failed', details },
         { status: 400 }
@@ -54,7 +58,13 @@ export function createPutHandler<TData, TEntity extends { id: string }>(
 
     const existing = await options.find(id)
     if (!existing) {
-      throw new NotFoundError(options.notFoundMessage)
+      return NextResponse.json({ error: options.notFoundMessage }, { status: 404 })
+    }
+
+    const data = validated.data as unknown as { slug?: string }
+    if (options.slugCheck && typeof data.slug === 'string') {
+      const conflict = await options.slugCheck(data.slug, id)
+      if (conflict) return conflict
     }
 
     const updated = await options.update(id, validated.data)
@@ -81,7 +91,7 @@ export function createDeleteHandler(
     const { id } = await params
     const existing = await options.find(id)
     if (!existing) {
-      throw new NotFoundError(options.notFoundMessage)
+      return NextResponse.json({ error: options.notFoundMessage }, { status: 404 })
     }
 
     await options.delete(id)

@@ -1,23 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from 'vitest'
+import { NextResponse } from 'next/server'
 import { createGetHandler, createDeleteHandler } from '@/lib/api/crud'
-import { NotFoundError } from '@/lib/errors'
 import { encrypt } from '@/lib/auth/session'
 
 const validToken = encrypt({ userId: '123', email: 'test@example.com', role: 'ADMIN' as const })
 
 describe('crud handlers', () => {
-  it('createGetHandler throws NotFoundError when not found', async () => {
+  it('createGetHandler returns 404 when not found', async () => {
     const handler = createGetHandler(
       async () => null,
       'Item not found'
     )
     const req = new Request('http://localhost') as any
     const params = Promise.resolve({ id: 'missing' })
-    await expect(handler(req, { params } as any)).rejects.toThrow(NotFoundError)
+    const res = await handler(req, { params } as any)
+    expect(res.status).toBe(404)
+    expect(await res.json()).toEqual({ error: 'Item not found' })
   })
 
-  it('createDeleteHandler throws NotFoundError when not found', async () => {
+  it('createDeleteHandler returns 404 when not found', async () => {
     const handler = createDeleteHandler({
       find: async () => null,
       delete: async () => {},
@@ -30,6 +32,8 @@ describe('crud handlers', () => {
       },
     } as any
     const params = Promise.resolve({ id: 'missing' })
-    await expect(handler(req, { params } as any)).rejects.toThrow(NotFoundError)
+    const res = await handler(req, { params } as any)
+    expect(res).toBeInstanceOf(NextResponse)
+    expect(res.status).toBe(404)
   })
 })

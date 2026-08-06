@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import styles from '../admin/admin.module.css'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -39,34 +40,44 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold">Admin Login</h1>
-        {error && <p className="text-red-500">{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
-        >
-          {loading ? 'Loading...' : 'Login'}
-        </button>
-      </form>
+    <div className={styles.adminLoginPage}>
+      <div className={styles.adminLoginCard}>
+        <h1>Вход в админку</h1>
+        <form onSubmit={handleSubmit} className={styles.adminForm}>
+          <div className={styles.adminFormGroup}>
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className={styles.adminFormGroup}>
+            <label htmlFor="password">Пароль</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          {error && (
+            <p className={styles.adminEmpty} style={{ padding: '8px 0', textAlign: 'left' }}>
+              {error}
+            </p>
+          )}
+          <div className={styles.adminFormActions}>
+            <button type="submit" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`} disabled={loading}>
+              {loading ? 'Загрузка...' : 'Войти'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

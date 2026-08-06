@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
         ...data,
         slug,
         authorId: payload.userId,
+        publishedAt: data.published ? new Date() : null,
       },
     })
 

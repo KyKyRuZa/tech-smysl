@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const validation = validateBody(loginSchema, body)
     if (!validation.success) {
-      logger.warn('Login validation failed', { errors: validation.response.json() })
+      logger.warn('Login validation failed')
       return validation.response
     }
 

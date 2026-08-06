@@ -9,7 +9,13 @@ const PAUSE_DURATION = 3000;
 const ERASE_SPEED = 20;
 const SLIDE_TRANSITION = 500;
 
-const HERO_SLIDES = [
+export interface HeroSlideData {
+  imageUrl: string;
+  imageAlt?: string;
+  subtitle?: string;
+}
+
+const DEFAULT_HERO_SLIDES = [
   {
     imageUrl: '/hero/1.svg',
     imageAlt: 'AR-решения и интерактивные инсталляции',
@@ -36,7 +42,8 @@ const HERO_SLIDES = [
   },
 ];
 
-export default function Hero() {
+export default function Hero({ slides }: { slides?: HeroSlideData[] }) {
+  const HERO_SLIDES: HeroSlideData[] = slides && slides.length > 0 ? slides : DEFAULT_HERO_SLIDES;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -84,7 +91,7 @@ export default function Hero() {
         {currentSlideData && (
           <Image
             src={currentSlideData.imageUrl}
-            alt={currentSlideData.imageAlt}
+            alt={currentSlideData.imageAlt || ''}
             className={`${styles.heroImg} ${imageFade ? '' : styles.fadeOut}`}
             width={1920}
             height={1080}

@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
       data: {
         ...data,
         slug,
+        publishedAt: data.published ? new Date() : null,
       },
     })
 

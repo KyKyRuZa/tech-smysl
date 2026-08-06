@@ -3,7 +3,7 @@
 import { useInView } from '@/hooks/useInView';
 import styles from './Articles.module.css';
 
-interface ArticleItem {
+export interface ArticleItem {
   id: string;
   title: string;
   excerpt: string;
@@ -48,7 +48,7 @@ interface ArticlesProps {
 
 const Articles: React.FC<ArticlesProps> = ({ items: externalItems }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
-  const items = externalItems ?? ITEMS;
+  const items = externalItems !== undefined ? externalItems : ITEMS;
 
   return (
     <section className={styles.articles}>
@@ -68,9 +68,13 @@ const Articles: React.FC<ArticlesProps> = ({ items: externalItems }) => {
         </div>
 
         <div className={styles.articlesGrid}>
-          {items.map((item, i) => (
-            <ArticleCard key={item.id} item={item} index={i} />
-          ))}
+          {items.length === 0 ? (
+            <p className={styles.empty}>Пока нет статей</p>
+          ) : (
+            items.map((item, i) => (
+              <ArticleCard key={item.id} item={item} index={i} />
+            ))
+          )}
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { blogPostSchema } from '@/lib/validation/schemas'
 import { createGetHandler, createPutHandler, createDeleteHandler } from '@/lib/api/crud'
+import { ensureSlugUnique } from '@/lib/api/helpers'
 
 export const GET = createGetHandler(
   (id) =>
@@ -25,10 +26,21 @@ export const GET = createGetHandler(
 
 export const PUT = createPutHandler({
   find: (id) => prisma.blogPost.findUnique({ where: { id } }),
-  update: (id, data) => prisma.blogPost.update({ where: { id }, data }),
+  update: (id, data) =>
+    prisma.blogPost.update({
+      where: { id },
+      data: {
+        ...data,
+        publishedAt: data.published ? new Date() : null,
+      },
+    }),
   validate: blogPostSchema.safeParse,
   notFoundMessage: 'BlogPost not found',
   logKey: 'BlogPost',
+  slugCheck: async (slug, id) => {
+    const result = await ensureSlugUnique('blogPost', slug, id)
+    return result.unique ? null : result.response
+  },
 })
 
 export const DELETE = createDeleteHandler({
