@@ -21,41 +21,46 @@ export default async function ProjectsPage() {
         {projects.length === 0 ? (
           <div className={styles.adminEmpty}>
             <p>Проектов пока нет.</p>
+            <a href="/admin/projects/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+              Создать первый проект
+            </a>
           </div>
         ) : (
-          <table className={styles.adminTable}>
-            <thead>
-              <tr>
-                <th>Название</th>
-                <th>Slug</th>
-                <th>Статус</th>
-                <th>Действия</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((project) => (
-                <tr key={project.id}>
-                  <td>{project.title}</td>
-                  <td>{project.slug}</td>
-                  <td>
-                    <span
-                      className={`${styles.adminBadge} ${project.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
-                    >
-                      {project.published ? 'Опубликован' : 'Черновик'}
-                    </span>
-                  </td>
-                  <td>
-                    <a
-                      href={`/admin/projects/${project.id}/edit`}
-                      className={`${styles.adminBtn} ${styles.adminBtnSecondary} ${styles.adminBtnSm}`}
-                    >
-                      Редактировать
-                    </a>
-                  </td>
+          <div className={styles.adminTableWrap}>
+            <table className={styles.adminTable}>
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Slug</th>
+                  <th>Статус</th>
+                  <th>Действия</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {projects.map((project) => (
+                  <tr key={project.id}>
+                    <td className={styles.adminTableTitle}>{project.title}</td>
+                    <td>{project.slug}</td>
+                    <td>
+                      <span
+                        className={`${styles.adminBadge} ${project.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
+                      >
+                        {project.published ? 'Опубликован' : 'Черновик'}
+                      </span>
+                    </td>
+                    <td>
+                      <a
+                        href={`/admin/projects/${project.id}/edit`}
+                        className={`${styles.adminBtn} ${styles.adminBtnSecondary} ${styles.adminBtnSm}`}
+                      >
+                        Редактировать
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

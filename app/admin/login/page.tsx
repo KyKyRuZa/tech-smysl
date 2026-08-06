@@ -14,6 +14,7 @@ export default async function AdminLoginPage() {
     <div className={styles.adminLoginPage}>
       <div className={styles.adminLoginCard}>
         <h1>Вход в админку</h1>
+        <p className={styles.adminLoginSub}>Введите свои учетные данные для входа</p>
         <form action="/api/auth/login" method="POST" className={styles.adminForm}>
           <div className={styles.adminFormGroup}>
             <label htmlFor="email">Email</label>

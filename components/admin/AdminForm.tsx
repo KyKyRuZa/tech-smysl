@@ -122,12 +122,7 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={styles.adminForm}
-      action={isEdit ? `/api/${entity}/${initialData!.id}` : `/api/${entity}`}
-      method={isEdit ? 'PUT' : 'POST'}
-    >
+    <form onSubmit={handleSubmit} className={styles.adminForm}>
       {fields.map((field) => {
         const value = initialData?.[field.name]
         const currentUrl = typeof value === 'string' ? value : ''
@@ -230,11 +225,7 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
         )
       })}
 
-      {error && (
-        <p className={styles.adminEmpty} style={{ padding: '8px 0', textAlign: 'left', color: '#e5484d' }}>
-          {error}
-        </p>
-      )}
+      {error && <div className={styles.adminError}>{error}</div>}
 
       <div className={styles.adminFormActions}>
         <a href={redirectPath} className={`${styles.adminBtn} ${styles.adminBtnSecondary}`}>
