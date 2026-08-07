@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { reviewSchema } from '@/lib/validation/schemas'
+import { reviewUpdateSchema } from '@/lib/validation/schemas'
 import { createGetHandler, createPutHandler, createDeleteHandler } from '@/lib/api/crud'
 
 export const GET = createGetHandler(
@@ -10,7 +10,7 @@ export const GET = createGetHandler(
 export const PUT = createPutHandler({
   find: (id) => prisma.review.findUnique({ where: { id } }),
   update: (id, data) => prisma.review.update({ where: { id }, data }),
-  validate: reviewSchema.safeParse,
+  validate: reviewUpdateSchema.safeParse,
   notFoundMessage: 'Review not found',
   logKey: 'Review',
 })

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { heroSlideSchema } from '@/lib/validation/schemas'
+import { heroSlideUpdateSchema } from '@/lib/validation/schemas'
 import { createGetHandler, createPutHandler, createDeleteHandler } from '@/lib/api/crud'
 
 export const GET = createGetHandler(
@@ -10,7 +10,7 @@ export const GET = createGetHandler(
 export const PUT = createPutHandler({
   find: (id) => prisma.heroSlide.findUnique({ where: { id } }),
   update: (id, data) => prisma.heroSlide.update({ where: { id }, data }),
-  validate: heroSlideSchema.safeParse,
+  validate: heroSlideUpdateSchema.safeParse,
   notFoundMessage: 'HeroSlide not found',
   logKey: 'HeroSlide',
 })

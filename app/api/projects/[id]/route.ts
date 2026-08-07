@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { projectSchema } from '@/lib/validation/schemas'
+import { projectUpdateSchema } from '@/lib/validation/schemas'
 import { createGetHandler, createPutHandler, createDeleteHandler } from '@/lib/api/crud'
 import { ensureSlugUnique } from '@/lib/api/helpers'
 
@@ -18,7 +18,7 @@ export const PUT = createPutHandler({
         publishedAt: data.published ? new Date() : null,
       },
     }),
-  validate: projectSchema.safeParse,
+  validate: projectUpdateSchema.safeParse,
   notFoundMessage: 'Project not found',
   logKey: 'Project',
   slugCheck: async (slug, id) => {

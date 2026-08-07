@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { blogPostSchema } from '@/lib/validation/schemas'
+import { blogPostUpdateSchema } from '@/lib/validation/schemas'
 import { createGetHandler, createPutHandler, createDeleteHandler } from '@/lib/api/crud'
 import { ensureSlugUnique } from '@/lib/api/helpers'
 
@@ -34,7 +34,7 @@ export const PUT = createPutHandler({
         publishedAt: data.published ? new Date() : null,
       },
     }),
-  validate: blogPostSchema.safeParse,
+  validate: blogPostUpdateSchema.safeParse,
   notFoundMessage: 'BlogPost not found',
   logKey: 'BlogPost',
   slugCheck: async (slug, id) => {

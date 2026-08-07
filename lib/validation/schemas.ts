@@ -21,6 +21,8 @@ export const projectSchema = z.object({
   order: z.number().int().optional(),
 })
 
+export const projectUpdateSchema = projectSchema.partial()
+
 export const heroSlideSchema = z.object({
   imageUrl: z.string().min(1, 'Image URL is required'),
   imageAlt: z.string().optional(),
@@ -31,6 +33,8 @@ export const heroSlideSchema = z.object({
   order: z.number().int().optional(),
   published: z.boolean().optional(),
 })
+
+export const heroSlideUpdateSchema = heroSlideSchema.partial()
 
 export const reviewSchema = z.object({
   headline: z.string().min(1, 'Headline is required'),
@@ -43,6 +47,8 @@ export const reviewSchema = z.object({
   published: z.boolean().optional(),
 })
 
+export const reviewUpdateSchema = reviewSchema.partial()
+
 export const blogPostSchema = z.object({
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Invalid slug format'),
   title: z.string().min(1, 'Title is required'),
@@ -53,3 +59,5 @@ export const blogPostSchema = z.object({
   published: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
 })
+
+export const blogPostUpdateSchema = blogPostSchema.partial()
