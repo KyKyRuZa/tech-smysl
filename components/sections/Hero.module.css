@@ -126,10 +126,7 @@
 }
 
 .heroEditable {
-  outline: 2px dashed var(--red);
-  outline-offset: -8px;
   cursor: pointer;
-  border-radius: 4px;
 }
 
 .heroEditBadge {

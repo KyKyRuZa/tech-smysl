@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import BlockControls from '@/components/admin/BlockControls';
 import styles from './Hero.module.css';
 
 const TYPING_SPEED = 30;
@@ -48,6 +49,10 @@ interface HeroProps {
   activeIndex?: number;
   onActiveChange?: (index: number) => void;
   onEdit?: () => void;
+  onAdd?: () => void;
+  onDelete?: () => void;
+  onToggle?: () => void;
+  slidePublished?: boolean;
 }
 
 export default function Hero({
@@ -56,6 +61,10 @@ export default function Hero({
   activeIndex = 0,
   onActiveChange,
   onEdit,
+  onAdd,
+  onDelete,
+  onToggle,
+  slidePublished,
 }: HeroProps) {
   const HERO_SLIDES: HeroSlideData[] = slides && slides.length > 0 ? slides : DEFAULT_HERO_SLIDES;
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -104,10 +113,7 @@ export default function Hero({
   const subtitleText = editable ? currentSlideData?.subtitle || '' : displayText;
 
   return (
-    <section
-      className={`${styles.hero} ${editable ? styles.heroEditable : ''}`}
-      onClick={editable ? onEdit : undefined}
-    >
+    <section className={`${styles.hero} ${editable ? styles.heroEditable : ''}`}>
       <div className={styles.heroImage}>
         {currentSlideData && (
           <Image
@@ -145,13 +151,13 @@ export default function Hero({
 
       {editable && (
         <>
-          <div className={styles.heroEditBadge}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-            </svg>
-            Редактировать слайд {active + 1}
-          </div>
+          <BlockControls
+            published={slidePublished}
+            onAdd={onAdd}
+            onEdit={onEdit ?? (() => {})}
+            onDelete={onDelete}
+            onToggle={onToggle}
+          />
 
           {HERO_SLIDES.length > 1 && (
             <div

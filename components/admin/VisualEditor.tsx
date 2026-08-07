@@ -14,6 +14,8 @@ import Testimonials from '@/components/sections/Testimonials'
 import Articles, { type ArticleItem } from '@/components/sections/Articles'
 import CTA from '@/components/sections/CTA'
 import type { FieldDef } from '@/components/admin/AdminForm'
+import { toSlug } from '@/lib/slug'
+import { useDialog } from '@/components/admin/DialogProvider'
 import styles from './VisualEditor.module.css'
 
 type Entity = 'hero-slides' | 'projects' | 'reviews' | 'blog-posts'
@@ -144,6 +146,7 @@ export default function VisualEditor({
   const [reviews, setReviews] = useState<Review[]>(initialReviews)
   const [articles, setArticles] = useState<BlogPost[]>(initialPosts)
 
+  const dialog = useDialog()
   const [activeHero, setActiveHero] = useState(0)
   const [panel, setPanel] = useState<PanelState | null>(null)
 
@@ -166,6 +169,7 @@ export default function VisualEditor({
         readTime: '',
         link: '/blog',
         order: i,
+        published: a.published,
       })),
     [articles]
   )
@@ -198,6 +202,49 @@ export default function VisualEditor({
     if (entity === 'reviews') setReviews((l) => l.filter((x) => x.id !== id))
     if (entity === 'blog-posts') setArticles((l) => l.filter((x) => x.id !== id))
     setPanel(null)
+  }
+
+  async function deleteItem(entity: Entity, id: string) {
+    if (!(await dialog.confirm({ title: 'Удалить элемент?', message: 'Вы уверены, что хотите удалить этот элемент?', destructive: true }))) {
+      return
+    }
+    try {
+      const res = await fetch(`/api/${entity}/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        await dialog.alert({ title: 'Ошибка', message: data.error || 'Не удалось удалить' })
+        return
+      }
+      applyDeleted(entity, id)
+      if (entity === 'hero-slides') setActiveHero((h) => Math.max(0, h - 1))
+    } catch {
+      await dialog.alert({ title: 'Ошибка', message: 'Не удалось удалить' })
+    }
+  }
+
+  async function toggleItem(entity: Entity, id: string, published: boolean) {
+    try {
+      const res = await fetch(`/api/${entity}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: !published }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        await dialog.alert({ title: 'Ошибка', message: data.error || 'Не удалось обновить' })
+        return
+      }
+      mergeItem(entity, id, { published: !published })
+    } catch {
+      await dialog.alert({ title: 'Ошибка', message: 'Не удалось обновить' })
+    }
+  }
+
+  function mergeItem(entity: Entity, id: string, patch: Record<string, unknown>) {
+    if (entity === 'hero-slides') setHeroSlides((l) => l.map((x) => (x.id === id ? ({ ...x, ...patch } as HeroSlide) : x)))
+    if (entity === 'projects') setProjects((l) => l.map((x) => (x.id === id ? ({ ...x, ...patch } as DbProject) : x)))
+    if (entity === 'reviews') setReviews((l) => l.map((x) => (x.id === id ? ({ ...x, ...patch } as Review) : x)))
+    if (entity === 'blog-posts') setArticles((l) => l.map((x) => (x.id === id ? ({ ...x, ...patch } as BlogPost) : x)))
   }
 
   return (
@@ -243,10 +290,20 @@ export default function VisualEditor({
             editable
             activeIndex={activeHero}
             onActiveChange={setActiveHero}
+            onAdd={() => openNew('hero-slides')}
             onEdit={() => {
               const s = heroSlides[activeHero]
               if (s) openEdit('hero-slides', s as unknown as Record<string, unknown>)
             }}
+            onDelete={() => {
+              const s = heroSlides[activeHero]
+              if (s) deleteItem('hero-slides', s.id)
+            }}
+            onToggle={() => {
+              const s = heroSlides[activeHero]
+              if (s) toggleItem('hero-slides', s.id, s.published)
+            }}
+            slidePublished={heroSlides[activeHero]?.published}
           />
         )}
 
@@ -262,10 +319,13 @@ export default function VisualEditor({
             order: p.order,
           }))}
           editable
+          onAdd={() => openNew('projects')}
           onEdit={(p) => {
             const full = projects.find((x) => x.id === p.id)
             if (full) openEdit('projects', full as unknown as Record<string, unknown>)
           }}
+          onDelete={(p) => deleteItem('projects', p.id)}
+          onToggle={(p) => toggleItem('projects', p.id, p.published)}
         />
 
         <Process />
@@ -277,21 +337,28 @@ export default function VisualEditor({
             body: r.body,
             author: r.author ?? '',
             role: r.role ?? '',
+            published: r.published,
           }))}
           editable
+          onAdd={() => openNew('reviews')}
           onEdit={(it) => {
             const full = reviews.find((x) => x.id === it.id)
             if (full) openEdit('reviews', full as unknown as Record<string, unknown>)
           }}
+          onDelete={(it) => deleteItem('reviews', it.id as string)}
+          onToggle={(it) => toggleItem('reviews', it.id as string, it.published ?? true)}
         />
 
         <Articles
           items={articleItems}
           editable
+          onAdd={() => openNew('blog-posts')}
           onEdit={(it) => {
             const full = articles.find((a) => a.id === it.id)
             if (full) openEdit('blog-posts', full as unknown as Record<string, unknown>)
           }}
+          onDelete={(it) => deleteItem('blog-posts', it.id as string)}
+          onToggle={(it) => toggleItem('blog-posts', it.id as string, it.published ?? true)}
         />
 
         <CTA />
@@ -355,6 +422,7 @@ function EntityPanel({
   onDeleted: (id: string) => void
   onClose: () => void
 }) {
+  const dialog = useDialog()
   const isEdit = Boolean(initialData?.id)
   const [form, setForm] = useState<Record<string, unknown>>(() => initForm(fields, initialData))
   const [files, setFiles] = useState<Record<string, File>>({})
@@ -399,6 +467,10 @@ function EntityPanel({
         payload[field.name] = form[field.name] ?? ''
       }
 
+      if (!payload.slug && payload.title && fields.some((f) => f.name === 'slug')) {
+        payload.slug = toSlug(String(payload.title))
+      }
+
       const url = isEdit ? `/api/${entity}/${initialData.id}` : `/api/${entity}`
       const method = isEdit ? 'PUT' : 'POST'
       const res = await fetch(url, {
@@ -422,7 +494,9 @@ function EntityPanel({
   }
 
   async function remove() {
-    if (!confirm('Удалить этот элемент?')) return
+    if (!(await dialog.confirm({ title: 'Удалить элемент?', message: 'Вы уверены, что хотите удалить этот элемент?', destructive: true }))) {
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch(`/api/${entity}/${initialData.id}`, { method: 'DELETE' })

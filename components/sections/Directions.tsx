@@ -3,7 +3,8 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { useInView } from '@/hooks/useInView';
-import EditableOverlay from '@/components/admin/EditableOverlay';
+import BlockControls from '@/components/admin/BlockControls';
+import BlockAddButton from '@/components/admin/BlockAddButton';
 import styles from './Directions.module.css';
 
 export interface Project {
@@ -20,7 +21,10 @@ export interface Project {
 interface DirectionsProps {
   projects?: Project[];
   editable?: boolean;
+  onAdd?: () => void;
   onEdit?: (project: Project, index: number) => void;
+  onDelete?: (project: Project, index: number) => void;
+  onToggle?: (project: Project, index: number) => void;
 }
 
 const PROJECTS: Project[] = [
@@ -80,11 +84,19 @@ const PROJECTS: Project[] = [
   },
 ];
 
-const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects, editable, onEdit }) => {
+const Directions: React.FC<DirectionsProps> = ({
+  projects: externalProjects,
+  editable,
+  onAdd,
+  onEdit,
+  onDelete,
+  onToggle,
+}) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
 
   const projects = externalProjects !== undefined ? externalProjects : PROJECTS;
+  const isEmpty = projects.length === 0;
 
   const scroll = (direction: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -94,7 +106,10 @@ const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects, edi
   };
 
   return (
-    <section className={styles.directions}>
+    <section
+      className={styles.directions}
+      style={editable ? { position: 'relative' } : undefined}
+    >
       <div className={styles.directionsInner}>
         <div className={styles.directionsHead} ref={headRef}>
           <div className={`${styles.animateIn} ${headVisible ? styles.visible : ''}`}>
@@ -121,7 +136,10 @@ const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects, edi
                   project={project}
                   index={i}
                   editable={editable}
+                  onAdd={onAdd}
                   onEdit={onEdit}
+                  onDelete={onDelete}
+                  onToggle={onToggle}
                 />
               ))}
             </div>
@@ -145,6 +163,7 @@ const Directions: React.FC<DirectionsProps> = ({ projects: externalProjects, edi
           </button>
         </div>
       </div>
+      {editable && <BlockAddButton onAdd={onAdd} />}
     </section>
   );
 };
@@ -153,12 +172,18 @@ function ProjectCard({
   project,
   index,
   editable,
+  onAdd,
   onEdit,
+  onDelete,
+  onToggle,
 }: {
   project: Project;
   index: number;
   editable?: boolean;
+  onAdd?: () => void;
   onEdit?: (project: Project, index: number) => void;
+  onDelete?: (project: Project, index: number) => void;
+  onToggle?: (project: Project, index: number) => void;
 }) {
   const { ref, isInView } = useInView({ threshold: 0.1 });
 
@@ -166,7 +191,7 @@ function ProjectCard({
     <article
       ref={ref}
       className={`${styles.projectCard} ${styles.animateIn} ${editable || isInView ? styles.visible : ''}`}
-      style={editable ? { position: 'relative' } : undefined}
+      style={editable ? { position: 'relative', opacity: editable && !project.published ? 0.55 : 1 } : undefined}
     >
       <Link
         href={`/projects/${project.slug || project.id}`}
@@ -192,7 +217,14 @@ function ProjectCard({
           )}
         </div>
       </Link>
-      {editable && <EditableOverlay onClick={() => onEdit?.(project, index)} />}
+      {editable && (
+        <BlockControls
+          published={project.published}
+          onEdit={() => onEdit?.(project, index)}
+          onDelete={() => onDelete?.(project, index)}
+          onToggle={() => onToggle?.(project, index)}
+        />
+      )}
     </article>
   );
 }

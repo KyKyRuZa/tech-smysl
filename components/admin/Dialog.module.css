@@ -1,0 +1,67 @@
+.card {
+  padding: 24px;
+}
+
+.title {
+  margin: 0 0 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--black);
+  letter-spacing: -0.2px;
+}
+
+.message {
+  margin: 0;
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.cancel,
+.confirm {
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-family: var(--sans);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.cancel {
+  background: var(--white);
+  color: var(--black);
+  border-color: var(--border);
+}
+
+.cancel:hover {
+  background: #f4f4f5;
+}
+
+.confirm {
+  background: var(--red);
+  color: #fff;
+}
+
+.confirm:hover {
+  background: var(--red-dark);
+}
+
+.danger {
+  background: #e5484d;
+  color: #fff;
+  border-color: #e5484d;
+}
+
+.danger:hover {
+  background: #c93b3f;
+  border-color: #c93b3f;
+}

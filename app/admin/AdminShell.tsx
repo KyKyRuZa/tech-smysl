@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import styles from './admin.module.css'
+import { DialogProvider } from '@/components/admin/DialogProvider'
 
 function NavIcon({ name }: { name: string }) {
   const common = {
@@ -138,7 +139,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </form>
           </div>
         </aside>
-        <main className={styles.adminMain}>{children}</main>
+        <main className={styles.adminMain}>
+          <DialogProvider>{children}</DialogProvider>
+        </main>
       </div>
     </>
   )

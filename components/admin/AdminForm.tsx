@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useDialog } from '@/components/admin/DialogProvider'
 import styles from '@/app/admin/admin.module.css'
 
 export type FieldType = 'text' | 'textarea' | 'number' | 'checkbox' | 'file' | 'tags'
@@ -35,6 +36,7 @@ async function uploadFile(file: File): Promise<string> {
 
 export default function AdminForm({ entity, fields, initialData, redirectPath }: AdminFormProps) {
   const router = useRouter()
+  const dialog = useDialog()
   const isEdit = Boolean(initialData?.id)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -103,7 +105,9 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
 
   async function handleDelete() {
     if (!initialData?.id) return
-    if (!confirm('Вы уверены, что хотите удалить?')) return
+    if (!(await dialog.confirm({ title: 'Удалить?', message: 'Вы уверены, что хотите удалить этот элемент?', destructive: true }))) {
+      return
+    }
     setLoading(true)
     try {
       const res = await fetch(`/api/${entity}/${initialData.id}`, { method: 'DELETE' })

@@ -1,7 +1,8 @@
 'use client';
 
 import { useInView } from '@/hooks/useInView';
-import EditableOverlay from '@/components/admin/EditableOverlay';
+import BlockControls from '@/components/admin/BlockControls';
+import BlockAddButton from '@/components/admin/BlockAddButton';
 import styles from './Testimonials.module.css';
 
 export interface Testimonial {
@@ -10,6 +11,7 @@ export interface Testimonial {
   body: string;
   author: string;
   role: string;
+  published?: boolean;
 }
 
 const ITEMS: Testimonial[] = [
@@ -42,15 +44,29 @@ const ITEMS: Testimonial[] = [
 interface TestimonialsProps {
   items?: Testimonial[];
   editable?: boolean;
+  onAdd?: () => void;
   onEdit?: (item: Testimonial, index: number) => void;
+  onDelete?: (item: Testimonial, index: number) => void;
+  onToggle?: (item: Testimonial, index: number) => void;
 }
 
-const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems, editable, onEdit }) => {
+const Testimonials: React.FC<TestimonialsProps> = ({
+  items: externalItems,
+  editable,
+  onAdd,
+  onEdit,
+  onDelete,
+  onToggle,
+}) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
   const items = externalItems !== undefined ? externalItems : ITEMS;
+  const isEmpty = items.length === 0;
 
   return (
-    <section className={styles.testimonials}>
+    <section
+      className={styles.testimonials}
+      style={editable ? { position: 'relative' } : undefined}
+    >
       <div className={styles.testimonialsInner}>
         <div className={styles.testimonialsHead} ref={headRef}>
           <div>
@@ -84,11 +100,21 @@ const Testimonials: React.FC<TestimonialsProps> = ({ items: externalItems, edita
             <p className={styles.empty}>Пока нет отзывов</p>
           ) : (
             items.map((item, i) => (
-              <TestimonialCard key={i} item={item} index={i} editable={editable} onEdit={onEdit} />
+              <TestimonialCard
+                key={i}
+                item={item}
+                index={i}
+                editable={editable}
+                onAdd={onAdd}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onToggle={onToggle}
+              />
             ))
           )}
         </div>
       </div>
+      {editable && <BlockAddButton onAdd={onAdd} />}
     </section>
   );
 };
@@ -97,12 +123,18 @@ function TestimonialCard({
   item,
   index,
   editable,
+  onAdd,
   onEdit,
+  onDelete,
+  onToggle,
 }: {
   item: Testimonial;
   index: number;
   editable?: boolean;
+  onAdd?: () => void;
   onEdit?: (item: Testimonial, index: number) => void;
+  onDelete?: (item: Testimonial, index: number) => void;
+  onToggle?: (item: Testimonial, index: number) => void;
 }) {
   const { ref, isInView } = useInView({ threshold: 0.1 });
 
@@ -110,7 +142,7 @@ function TestimonialCard({
     <div
       ref={ref}
       className={`${styles.tCard} ${styles.animateIn} ${editable || isInView ? styles.visible : ''}`}
-      style={editable ? { position: 'relative' } : undefined}
+      style={editable ? { position: 'relative', opacity: editable && !item.published ? 0.55 : 1 } : undefined}
     >
       <div className={styles.tCardText}>
         {item.headline}
@@ -123,7 +155,14 @@ function TestimonialCard({
           <p className={styles.tRole}>{item.role}</p>
         </div>
       </div>
-      {editable && <EditableOverlay onClick={() => onEdit?.(item, index)} />}
+      {editable && (
+        <BlockControls
+          published={item.published}
+          onEdit={() => onEdit?.(item, index)}
+          onDelete={() => onDelete?.(item, index)}
+          onToggle={() => onToggle?.(item, index)}
+        />
+      )}
     </div>
   );
 }
