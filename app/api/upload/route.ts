@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import path from 'path'
-import { writeFile, mkdir } from 'fs/promises'
-import { processImage } from '@/lib/upload/sharp'
-import { getPublicUrl } from '@/lib/upload/multer'
+import { mkdir } from 'fs/promises'
+import sharp from 'sharp'
 import { AppError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { requireAuth } from '@/lib/auth/require-auth'
 
 const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploads')
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_SIZE = 5 * 1024 * 1024
+const ALLOWED_FORMATS = new Set(['jpeg', 'png', 'webp', 'gif'])
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,27 +24,37 @@ export async function POST(request: NextRequest) {
       throw new AppError(400, 'No file uploaded')
     }
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      throw new AppError(400, 'Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.')
-    }
-
     if (file.size > MAX_SIZE) {
       throw new AppError(400, 'File too large. Maximum size is 5 MB.')
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const ext = path.extname(file.name) || '.webp'
-    const filename = `${randomUUID()}${ext}`
+    const buffer = Buffer.from(await file.arrayBuffer())
+
+    let format: string
+    try {
+      const metadata = await sharp(buffer).metadata()
+      format = (metadata.format || '').toLowerCase()
+    } catch {
+      throw new AppError(400, 'Invalid image file.')
+    }
+
+    if (!ALLOWED_FORMATS.has(format)) {
+      throw new AppError(400, 'Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.')
+    }
+
+    const filename = `${randomUUID()}.webp`
+    const outputPath = path.join(uploadDir, filename)
 
     await mkdir(uploadDir, { recursive: true })
-    await writeFile(path.join(uploadDir, filename), buffer)
+    await sharp(buffer)
+      .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toFile(outputPath)
 
-    const processedFilename = await processImage(filename)
-    const url = getPublicUrl(processedFilename)
+    const url = `/uploads/${filename}`
 
-    logger.info('Image uploaded and processed', { filename: processedFilename })
-    return NextResponse.json({ url, filename: processedFilename }, { status: 201 })
+    logger.info('Image uploaded and processed', { filename })
+    return NextResponse.json({ url, filename }, { status: 201 })
   } catch (error) {
     if (error instanceof AppError) {
       logger.warn('Upload validation error', { statusCode: error.statusCode, message: error.message })

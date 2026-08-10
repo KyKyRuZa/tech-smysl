@@ -58,6 +58,23 @@ function getCorsHeaders(req: NextRequest): Record<string, string> {
   }
 }
 
+function buildCsp(nonce: string): string {
+  const isDev = process.env.NODE_ENV === 'development'
+  const csp = `
+    default-src 'self';
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''};
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: https: blob:;
+    font-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    ${isDev ? '' : 'upgrade-insecure-requests;'}
+  `
+  return csp.replace(/\s{2,}/g, ' ').trim()
+}
+
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
@@ -65,6 +82,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next()
   }
 
+  const nonce = crypto.randomUUID()
   const corsHeaders = getCorsHeaders(req)
 
   if (req.method === 'OPTIONS') {
@@ -116,6 +134,20 @@ export async function proxy(req: NextRequest) {
   }
 
   const res = NextResponse.next()
+
+  if (!pathname.startsWith('/api/')) {
+    const csp = buildCsp(nonce)
+
+    const requestHeaders = new Headers(req.headers)
+    requestHeaders.set('x-nonce', nonce)
+    requestHeaders.set('Content-Security-Policy', csp)
+    res.headers.set('Content-Security-Policy', csp)
+
+    if (process.env.NODE_ENV === 'production') {
+      res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+    }
+  }
+
   for (const [key, value] of Object.entries(corsHeaders)) {
     res.headers.set(key, value)
   }

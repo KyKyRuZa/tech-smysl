@@ -6,6 +6,7 @@ import { UnauthorizedError } from '@/lib/errors'
 import bcrypt from 'bcrypt'
 import { logger } from '@/lib/logger'
 import { validateBody } from '@/lib/auth/middleware'
+import { rateLimit, loginRateLimitKey, getClientIp } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,6 +18,16 @@ export async function POST(req: NextRequest) {
     }
 
     const { email, password } = validation.data
+
+    const clientIp = getClientIp(req)
+    if (!rateLimit(loginRateLimitKey(clientIp, email), 10, 15 * 60 * 1000)) {
+      logger.warn('Login rate limit exceeded', { clientIp, email })
+      return NextResponse.json(
+        { error: 'Too many login attempts. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
       select: { id: true, email: true, passwordHash: true, role: true },

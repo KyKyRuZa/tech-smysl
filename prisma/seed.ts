@@ -5,13 +5,16 @@ import { logger } from '@/lib/logger'
 
 async function main() {
   const email = 'admin@techsmysl.ru'
-  const password = 'ge65penyxe2an4zf7c28m5t4rj'
+  const password = process.env.DEFAULT_ADMIN_PASSWORD
+  if (!password) {
+    throw new Error('DEFAULT_ADMIN_PASSWORD is not set. Refusing to seed with a known default password.')
+  }
 
   const existing = await prisma.user.findUnique({ where: { email } })
   if (existing) {
     logger.info('Seed skipped: admin already exists', { email })
   } else {
-    const passwordHash = await bcrypt.hash(password, 10)
+    const passwordHash = await bcrypt.hash(password, 12)
 
     await prisma.user.create({
       data: {

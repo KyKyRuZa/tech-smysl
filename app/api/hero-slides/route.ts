@@ -9,6 +9,10 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const all = searchParams.get('all') === 'true'
+    if (all) {
+      const auth = await requireAuth(req)
+      if (auth instanceof NextResponse) return auth
+    }
     const items = await prisma.heroSlide.findMany({
       where: all ? {} : { published: true },
       orderBy: { order: 'asc' },

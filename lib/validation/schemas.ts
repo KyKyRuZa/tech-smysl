@@ -1,5 +1,22 @@
 import { z } from 'zod'
 
+const safeUrlSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => {
+      if (value.startsWith('#') || value.startsWith('/')) return true
+      try {
+        const parsed = new URL(value)
+        return ['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol)
+      } catch {
+        return false
+      }
+    },
+    { message: 'Недопустимый URL' }
+  )
+  .optional()
+
 export const loginSchema = z.object({
   email: z.string().email('Invalid email'),
   password: z.string().min(1, 'Password is required'),
@@ -29,7 +46,7 @@ export const heroSlideSchema = z.object({
   title: z.string().optional(),
   subtitle: z.string().optional(),
   ctaText: z.string().optional(),
-  ctaLink: z.string().optional(),
+  ctaLink: safeUrlSchema,
   order: z.number().int().optional(),
   published: z.boolean().optional(),
 })
