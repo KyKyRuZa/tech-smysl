@@ -1,6 +1,7 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { getAdminHeroSlides } from '@/lib/admin-queries'
+import RowActions from '@/components/admin/RowActions'
 import styles from '../admin.module.css'
 
 export default async function HeroSlidesPage() {
@@ -49,12 +50,7 @@ export default async function HeroSlidesPage() {
                       </span>
                     </td>
                     <td>
-                      <a
-                        href={`/admin/hero-slides/${slide.id}/edit`}
-                        className={`${styles.adminBtn} ${styles.adminBtnSecondary} ${styles.adminBtnSm}`}
-                      >
-                        Редактировать
-                      </a>
+                      <RowActions entity="hero-slides" id={slide.id} redirectPath="/admin/hero-slides" />
                     </td>
                   </tr>
                 ))}

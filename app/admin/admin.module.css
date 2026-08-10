@@ -36,7 +36,7 @@
   gap: 0;
 }
 
-.adminSidebar.collapsed .adminLogo {
+.adminSidebar.collapsed .adminLogoLink {
   display: none;
 }
 
@@ -62,18 +62,17 @@
   background: #f4f4f5;
 }
 
-.adminLogo {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--red);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--white);
+.adminLogoLink {
+  display: inline-flex;
   flex-shrink: 0;
+  text-decoration: none;
+  line-height: 0;
+}
+
+.adminLogoImg {
+  height: 32px;
+  width: auto;
+  display: block;
 }
 
 .adminSidebarHeader h2 {
@@ -360,6 +359,49 @@
   font-size: 13px;
 }
 
+.adminRowActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adminIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--gray);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.adminIconBtn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.adminIconBtn:hover {
+  background: #f4f4f5;
+  color: var(--black);
+  border-color: var(--gray-light);
+}
+
+.adminIconBtnEdit:hover {
+  color: var(--red);
+  border-color: rgba(192, 57, 43, 0.35);
+}
+
+.adminIconBtnDelete:hover {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.04);
+}
+
 .adminForm {
   display: flex;
   flex-direction: column;
@@ -410,6 +452,21 @@
   outline: none;
   border-color: var(--red);
   box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+}
+
+.adminFormGroup input[type='checkbox']:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.adminFormGroupCheckbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.adminFormGroupCheckbox label {
+  margin: 0;
 }
 
 .adminFormGroup input[type='checkbox'] {

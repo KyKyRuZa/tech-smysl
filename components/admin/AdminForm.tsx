@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useDialog } from '@/components/admin/DialogProvider'
+import Link from 'next/link'
 import styles from '@/app/admin/admin.module.css'
 
 export type FieldType = 'text' | 'textarea' | 'number' | 'checkbox' | 'file' | 'tags'
@@ -36,7 +36,6 @@ async function uploadFile(file: File): Promise<string> {
 
 export default function AdminForm({ entity, fields, initialData, redirectPath }: AdminFormProps) {
   const router = useRouter()
-  const dialog = useDialog()
   const isEdit = Boolean(initialData?.id)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -103,28 +102,6 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
     }
   }
 
-  async function handleDelete() {
-    if (!initialData?.id) return
-    if (!(await dialog.confirm({ title: 'Удалить?', message: 'Вы уверены, что хотите удалить этот элемент?', destructive: true }))) {
-      return
-    }
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/${entity}/${initialData.id}`, { method: 'DELETE' })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        setError(data.error || 'Не удалось удалить')
-        setLoading(false)
-        return
-      }
-      router.push(redirectPath)
-      router.refresh()
-    } catch {
-      setError('Не удалось удалить')
-      setLoading(false)
-    }
-  }
-
   return (
     <form onSubmit={handleSubmit} className={styles.adminForm}>
       {fields.map((field) => {
@@ -170,7 +147,7 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
 
         if (field.type === 'checkbox') {
           return (
-            <div className={styles.adminFormGroup} key={field.name}>
+            <div className={`${styles.adminFormGroup} ${styles.adminFormGroupCheckbox}`} key={field.name}>
               <label htmlFor={field.name}>{field.label}</label>
               <input
                 id={field.name}
@@ -232,9 +209,9 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
       {error && <div className={styles.adminError}>{error}</div>}
 
       <div className={styles.adminFormActions}>
-        <a href={redirectPath} className={`${styles.adminBtn} ${styles.adminBtnSecondary}`}>
+        <Link href={redirectPath} className={`${styles.adminBtn} ${styles.adminBtnSecondary}`}>
           Отмена
-        </a>
+        </Link>
         <button
           type="submit"
           className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}
@@ -242,16 +219,6 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
         >
           {loading ? 'Сохранение...' : isEdit ? 'Сохранить' : 'Создать'}
         </button>
-        {isEdit && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className={`${styles.adminBtn} ${styles.adminBtnDanger}`}
-            disabled={loading}
-          >
-            Удалить
-          </button>
-        )}
       </div>
     </form>
   )

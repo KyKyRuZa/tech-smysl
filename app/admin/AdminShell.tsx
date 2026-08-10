@@ -1,6 +1,8 @@
 'use client'
 
 import { useLayoutEffect, useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import NavIcon from '@/components/admin/NavIcon'
 import styles from './admin.module.css'
@@ -57,7 +59,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       <div className={`${styles.adminLayout} ${collapsed ? styles.collapsed : ''}`}>
         <aside className={`${styles.adminSidebar} ${open ? styles.open : ''} ${collapsed ? styles.collapsed : ''}`}>
           <div className={styles.adminSidebarHeader}>
-            <div className={styles.adminLogo}>S</div>
+            <Link href="/" className={styles.adminLogoLink}>
+              <Image src="/logo.svg" alt="Tech Smysl" className={styles.adminLogoImg} width={187} height={42} priority />
+            </Link>
             <button
               type="button"
               className={styles.adminCollapseBtn}
@@ -75,7 +79,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </div>
           <nav className={styles.adminNav}>
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className={styles.adminNavItem}
@@ -94,7 +98,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   <NavIcon name={item.icon} />
                 </span>
                 <span className={styles.adminNavLabel}>{item.label}</span>
-              </a>
+              </Link>
             ))}
           </nav>
           <div className={styles.adminSidebarFooter}>

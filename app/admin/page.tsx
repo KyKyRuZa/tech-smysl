@@ -55,7 +55,7 @@ export default async function AdminPage() {
           }}
         >
           {quickLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               style={{
@@ -71,7 +71,7 @@ export default async function AdminPage() {
             >
               <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--black)' }}>{link.label}</div>
               <div style={{ fontSize: 13, color: 'var(--gray)', marginTop: 4 }}>{link.desc}</div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { getAdminBlogPosts } from '@/lib/admin-queries'
+import RowActions from '@/components/admin/RowActions'
 import styles from '../admin.module.css'
 
 export default async function BlogPostsPage() {
@@ -49,12 +50,7 @@ export default async function BlogPostsPage() {
                       </span>
                     </td>
                     <td>
-                      <a
-                        href={`/admin/blog-posts/${post.id}/edit`}
-                        className={`${styles.adminBtn} ${styles.adminBtnSecondary} ${styles.adminBtnSm}`}
-                      >
-                        Редактировать
-                      </a>
+                      <RowActions entity="blog-posts" id={post.id} redirectPath="/admin/blog-posts" />
                     </td>
                   </tr>
                 ))}
