@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { POST as logoutPost } from '@/app/api/auth/logout/route'
 
 vi.mock('@/lib/logger', () => ({
@@ -22,7 +22,7 @@ describe('POST /api/auth/logout', () => {
   it('logs out successfully', async () => {
     const req = new Request('http://localhost/api/auth/logout', {
       method: 'POST',
-    }) as any
+    }) as NextRequest
 
     const response = await logoutPost(req)
 

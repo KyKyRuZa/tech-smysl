@@ -1,13 +1,13 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getAdminProjects } from '@/lib/admin-queries'
 import styles from '../admin.module.css'
 
 export default async function ProjectsPage() {
   const session = await verifySession()
   if (!session) redirect('/login')
 
-  const projects = await prisma.project.findMany({ orderBy: { order: 'asc' } })
+  const projects = await getAdminProjects()
 
   return (
     <div>

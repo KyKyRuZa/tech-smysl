@@ -61,3 +61,11 @@ export const blogPostSchema = z.object({
 })
 
 export const blogPostUpdateSchema = blogPostSchema.partial()
+
+export const applicationSchema = z.object({
+  name: z.string().min(1, 'Имя обязательно').max(100),
+  email: z.string().email('Некорректный email'),
+  phone: z.string().max(30).optional(),
+  service: z.string().max(50).optional(),
+  message: z.string().min(1, 'Опишите задачу').max(2000),
+})

@@ -4,7 +4,8 @@ import Process from '@/components/sections/Process'
 // import CaseStudy from '@/components/sections/CaseStudy'
 import Testimonials, { type Testimonial } from '@/components/sections/Testimonials'
 import Articles, { type ArticleItem } from '@/components/sections/Articles'
-import CTA from '@/components/sections/CTA'
+// import CTA from '@/components/sections/CTA'
+import ContactSection from './ContactSection'
 import { prisma } from '@/lib/prisma'
 
 function estimateReadTime(content: string | null | undefined): string {
@@ -76,7 +77,8 @@ export default async function Home() {
       {/* <CaseStudy /> */}
       <Testimonials items={reviewItems} />
       <Articles items={articleItems} />
-      <CTA />
+      {/* <CTA /> */}
+      <ContactSection />
     </>
   )
 }

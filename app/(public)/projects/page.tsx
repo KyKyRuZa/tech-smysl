@@ -1,6 +1,6 @@
 import styles from './page.module.css'
 import { prisma } from '@/lib/prisma'
-import Link from 'next/link'
+import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,13 +20,13 @@ export default async function Projects() {
           {projects.map((project) => (
             <li key={project.id} className={styles.card}>
               {project.imageUrl && (
-                <img
+                <Image
                   src={project.imageUrl}
                   alt={project.title}
                   className={styles.cardImg}
-                  loading="lazy"
                   width={800}
                   height={600}
+                  loading="lazy"
                 />
               )}
               <h2 className={styles.cardTitle}>{project.title}</h2>

@@ -1,15 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { POST as loginPost } from '@/app/api/auth/login/route'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcrypt'
 
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
+const { mockPrisma, mockBcrypt } = vi.hoisted(() => ({
+  mockPrisma: {
     user: {
       findUnique: vi.fn(),
     },
   },
+  mockBcrypt: {
+    compare: vi.fn(),
+  },
+}))
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: mockPrisma,
 }))
 
 vi.mock('@/lib/logger', () => ({
@@ -21,17 +26,12 @@ vi.mock('@/lib/logger', () => ({
 }))
 
 vi.mock('bcrypt', () => ({
-  default: {
-    compare: vi.fn(),
-  },
+  default: mockBcrypt,
 }))
 
 vi.mock('@/lib/auth/session', () => ({
   createSession: vi.fn(),
 }))
-
-const mockPrisma = vi.mocked(prisma)
-const mockBcrypt = vi.mocked(bcrypt)
 
 describe('POST /api/auth/login', () => {
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe('POST /api/auth/login', () => {
       method: 'POST',
       body: JSON.stringify({ email: 'not-an-email', password: 'secret' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await loginPost(req)
     expect(response.status).toBe(400)
@@ -54,7 +54,7 @@ describe('POST /api/auth/login', () => {
       method: 'POST',
       body: JSON.stringify({ email: 'admin@example.com' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await loginPost(req)
     expect(response.status).toBe(400)
@@ -67,7 +67,7 @@ describe('POST /api/auth/login', () => {
       method: 'POST',
       body: JSON.stringify({ email: 'nonexistent@example.com', password: 'secret' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await loginPost(req)
     const json = await response.json()
@@ -81,14 +81,14 @@ describe('POST /api/auth/login', () => {
       email: 'admin@example.com',
       passwordHash: 'hashed',
       role: 'ADMIN',
-    } as any)
+    })
     mockBcrypt.compare.mockResolvedValue(false)
 
     const req = new Request('http://localhost/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email: 'admin@example.com', password: 'wrong' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await loginPost(req)
     const json = await response.json()
@@ -102,14 +102,14 @@ describe('POST /api/auth/login', () => {
       email: 'admin@example.com',
       passwordHash: 'hashed',
       role: 'ADMIN',
-    } as any)
+    })
     mockBcrypt.compare.mockResolvedValue(true)
 
     const req = new Request('http://localhost/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email: 'admin@example.com', password: 'secret' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await loginPost(req)
     const json = await response.json()

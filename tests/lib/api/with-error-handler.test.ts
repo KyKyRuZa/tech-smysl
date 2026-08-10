@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest'
-import { NextResponse } from 'next/server'
+import { describe, it, expect } from 'vitest'
+import { NextRequest, NextResponse } from 'next/server'
 import { withErrorHandler } from '@/lib/api/with-error-handler'
-import { AppError, NotFoundError } from '@/lib/errors'
+import { NotFoundError } from '@/lib/errors'
 
 const createMockRequest = () => new Request('http://localhost/api/test')
 
@@ -11,7 +11,7 @@ describe('withErrorHandler', () => {
       return NextResponse.json({ ok: true }, { status: 200 })
     })
     const req = createMockRequest()
-    const response = await handler(req as any)
+    const response = await handler(req as NextRequest)
     expect(response.status).toBe(200)
     const json = await response.json()
     expect(json.ok).toBe(true)
@@ -22,7 +22,7 @@ describe('withErrorHandler', () => {
       throw new NotFoundError('Not found')
     })
     const req = createMockRequest()
-    const response = await handler(req as any)
+    const response = await handler(req as NextRequest)
     expect(response.status).toBe(404)
     const json = await response.json()
     expect(json.error).toBe('Not found')
@@ -33,7 +33,7 @@ describe('withErrorHandler', () => {
       throw new Error('Something broke')
     })
     const req = createMockRequest()
-    const response = await handler(req as any)
+    const response = await handler(req as NextRequest)
     expect(response.status).toBe(500)
     const json = await response.json()
     expect(json.error).toBe('Internal server error')
@@ -44,7 +44,7 @@ describe('withErrorHandler', () => {
       throw new Error('File is required')
     })
     const req = createMockRequest()
-    const response = await handler(req as any)
+    const response = await handler(req as NextRequest)
     expect(response.status).toBe(400)
     const json = await response.json()
     expect(json.error).toBe('File is required')
@@ -55,7 +55,7 @@ describe('withErrorHandler', () => {
       throw 'string error'
     })
     const req = createMockRequest()
-    const response = await handler(req as any)
+    const response = await handler(req as NextRequest)
     expect(response.status).toBe(500)
     const json = await response.json()
     expect(json.error).toBe('Internal server error')

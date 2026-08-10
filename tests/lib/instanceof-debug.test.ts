@@ -6,6 +6,6 @@ describe('instanceof check', () => {
     const e = new NotFoundError('test')
     expect(e instanceof AppError).toBe(true)
     expect(e instanceof Error).toBe(true)
-    expect((e as any).statusCode).toBe(404)
+    expect(e.statusCode).toBe(404)
   })
 })

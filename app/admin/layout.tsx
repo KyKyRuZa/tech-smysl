@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import AdminShell from './AdminShell'
+import AdminShellClient from './AdminShellClient'
 import './admin.module.css'
 import '../globals.css'
 
@@ -12,5 +12,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <AdminShell>{children}</AdminShell>
+  return <AdminShellClient>{children}</AdminShellClient>
 }

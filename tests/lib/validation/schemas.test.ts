@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { loginSchema, projectSchema, heroSlideSchema, reviewSchema, blogPostSchema } from '@/lib/validation/schemas'
+import { loginSchema, projectSchema, heroSlideSchema, reviewSchema, applicationSchema } from '@/lib/validation/schemas'
 
 describe('validation schemas', () => {
   describe('loginSchema', () => {
@@ -125,30 +125,68 @@ describe('validation schemas', () => {
     })
   })
 
-  describe('blogPostSchema', () => {
-    it('accepts valid data', () => {
-      const result = blogPostSchema.safeParse({
-        slug: 'my-post',
-        title: 'My Post',
-        content: 'Content here',
+  describe('applicationSchema', () => {
+    it('accepts valid data with all fields', () => {
+      const result = applicationSchema.safeParse({
+        name: 'Иван',
+        email: 'ivan@example.com',
+        phone: '+79990000000',
+        service: 'web',
+        message: 'Нужен сайт',
       })
       expect(result.success).toBe(true)
     })
 
-    it('rejects invalid slug format', () => {
-      const result = blogPostSchema.safeParse({ slug: 'My Post!', title: 'Title', content: 'Content' })
+    it('accepts data with only required fields', () => {
+      const result = applicationSchema.safeParse({
+        name: 'Иван',
+        email: 'ivan@example.com',
+        message: 'Нужен сайт',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects missing name', () => {
+      const result = applicationSchema.safeParse({
+        email: 'ivan@example.com',
+        message: 'Нужен сайт',
+      })
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.flatten().fieldErrors.slug).toBeDefined()
+        expect(result.error.flatten().fieldErrors.name).toBeDefined()
       }
     })
 
-    it('rejects missing content', () => {
-      const result = blogPostSchema.safeParse({ slug: 'my-post', title: 'Title' })
+    it('rejects invalid email', () => {
+      const result = applicationSchema.safeParse({
+        name: 'Иван',
+        email: 'not-an-email',
+        message: 'Нужен сайт',
+      })
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.flatten().fieldErrors.content).toBeDefined()
+        expect(result.error.flatten().fieldErrors.email).toBeDefined()
       }
+    })
+
+    it('rejects missing message', () => {
+      const result = applicationSchema.safeParse({
+        name: 'Иван',
+        email: 'ivan@example.com',
+      })
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error.flatten().fieldErrors.message).toBeDefined()
+      }
+    })
+
+    it('rejects too long message', () => {
+      const result = applicationSchema.safeParse({
+        name: 'Иван',
+        email: 'ivan@example.com',
+        message: 'x'.repeat(2001),
+      })
+      expect(result.success).toBe(false)
     })
   })
 })

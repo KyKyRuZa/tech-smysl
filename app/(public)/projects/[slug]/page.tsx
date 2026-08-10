@@ -1,6 +1,7 @@
 import styles from '../page.module.css'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,7 @@ export default async function ProjectDetail({
       <h1 className={styles.title}>{project.title}</h1>
       {project.subtitle && <p className={styles.placeholder}>{project.subtitle}</p>}
       {project.imageUrl && (
-        <img
+        <Image
           src={project.imageUrl}
           alt={project.title}
           className={styles.cardImg}

@@ -96,3 +96,15 @@ model BlogPost {
   @@index([published, publishedAt])
   @@index([slug])
 }
+
+model Application {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  service   String?
+  message   String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

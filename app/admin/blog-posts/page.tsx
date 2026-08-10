@@ -1,13 +1,13 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getAdminBlogPosts } from '@/lib/admin-queries'
 import styles from '../admin.module.css'
 
 export default async function BlogPostsPage() {
   const session = await verifySession()
   if (!session) redirect('/login')
 
-  const posts = await prisma.blogPost.findMany({ orderBy: { publishedAt: 'desc' } })
+  const posts = await getAdminBlogPosts()
 
   return (
     <div>

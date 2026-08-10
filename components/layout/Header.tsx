@@ -24,8 +24,8 @@ export default async function Header() {
           <Link href="/projects" className={styles.navLink}>
             Портфолио
           </Link>
-          <Link href="/contacts" className={styles.navLink}>
-            Контакты
+          <Link href="/#discuss" className={styles.navLink}>
+            Обсудить проект
           </Link>
         </nav>
 

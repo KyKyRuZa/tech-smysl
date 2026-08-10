@@ -1,22 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { GET, POST } from '@/app/api/blog-posts/route'
-import { prisma } from '@/lib/prisma'
-import { requireAuth } from '@/lib/auth/require-auth'
 import { blogPostSelect } from '@/lib/api/helpers'
 
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
+const { mockPrisma, mockRequireAuth } = vi.hoisted(() => ({
+  mockPrisma: {
     blogPost: {
       findMany: vi.fn(),
       findFirst: vi.fn(),
       create: vi.fn(),
     },
   },
+  mockRequireAuth: vi.fn(),
+}))
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: mockPrisma,
 }))
 
 vi.mock('@/lib/auth/require-auth', () => ({
-  requireAuth: vi.fn(),
+  requireAuth: mockRequireAuth,
 }))
 
 vi.mock('@/lib/logger', () => ({
@@ -27,9 +30,6 @@ vi.mock('@/lib/logger', () => ({
   },
 }))
 
-const mockPrisma = vi.mocked(prisma)
-const mockRequireAuth = vi.mocked(requireAuth)
-
 describe('GET /api/blog-posts', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -37,9 +37,9 @@ describe('GET /api/blog-posts', () => {
 
   it('returns only published posts by default', async () => {
     const posts = [{ id: '1', title: 'Published Post', published: true }]
-    mockPrisma.blogPost.findMany.mockResolvedValue(posts as any)
+    mockPrisma.blogPost.findMany.mockResolvedValue(posts)
 
-    const req = new Request('http://localhost/api/blog-posts') as any
+    const req = new Request('http://localhost/api/blog-posts') as NextRequest
     const response = await GET(req)
     const json = await response.json()
 
@@ -57,9 +57,9 @@ describe('GET /api/blog-posts', () => {
       { id: '1', title: 'Published', published: true },
       { id: '2', title: 'Draft', published: false },
     ]
-    mockPrisma.blogPost.findMany.mockResolvedValue(posts as any)
+    mockPrisma.blogPost.findMany.mockResolvedValue(posts)
 
-    const req = new Request('http://localhost/api/blog-posts?all=true') as any
+    const req = new Request('http://localhost/api/blog-posts?all=true') as NextRequest
     const response = await GET(req)
     const json = await response.json()
 
@@ -75,7 +75,7 @@ describe('GET /api/blog-posts', () => {
   it('returns 500 on database error', async () => {
     mockPrisma.blogPost.findMany.mockRejectedValue(new Error('DB error'))
 
-    const req = new Request('http://localhost/api/blog-posts') as any
+    const req = new Request('http://localhost/api/blog-posts') as NextRequest
     const response = await GET(req)
     const json = await response.json()
 
@@ -91,7 +91,7 @@ describe('POST /api/blog-posts', () => {
 
   it('creates post for authenticated admin', async () => {
     const payload = { userId: '1', email: 'admin@example.com', role: 'ADMIN' as const }
-    mockRequireAuth.mockResolvedValue(payload as any)
+    mockRequireAuth.mockResolvedValue(payload)
     mockPrisma.blogPost.findFirst.mockResolvedValue(null)
     mockPrisma.blogPost.create.mockResolvedValue({
       id: '1',
@@ -102,13 +102,13 @@ describe('POST /api/blog-posts', () => {
       publishedAt: null,
       tags: [],
       createdAt: new Date(),
-    } as any)
+    })
 
     const req = new Request('http://localhost/api/blog-posts', {
       method: 'POST',
       body: JSON.stringify({ slug: 'my-post', title: 'My Post', content: 'Content' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await POST(req)
     const json = await response.json()
@@ -126,20 +126,20 @@ describe('POST /api/blog-posts', () => {
       method: 'POST',
       body: JSON.stringify({ slug: 'my-post', title: 'My Post' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await POST(req)
     expect(response.status).toBe(401)
   })
 
   it('returns 400 for invalid body', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: '1', email: 'admin@example.com', role: 'ADMIN' } as any)
+    mockRequireAuth.mockResolvedValue({ userId: '1', email: 'admin@example.com', role: 'ADMIN' })
 
     const req = new Request('http://localhost/api/blog-posts', {
       method: 'POST',
       body: JSON.stringify({ title: 'No slug' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await POST(req)
     expect(response.status).toBe(400)

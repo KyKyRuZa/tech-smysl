@@ -1,13 +1,13 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getAdminReviews } from '@/lib/admin-queries'
 import styles from '../admin.module.css'
 
 export default async function ReviewsPage() {
   const session = await verifySession()
   if (!session) redirect('/login')
 
-  const reviews = await prisma.review.findMany({ orderBy: { order: 'asc' } })
+  const reviews = await getAdminReviews()
 
   return (
     <div>

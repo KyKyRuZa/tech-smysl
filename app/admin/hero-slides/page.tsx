@@ -1,13 +1,13 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getAdminHeroSlides } from '@/lib/admin-queries'
 import styles from '../admin.module.css'
 
 export default async function HeroSlidesPage() {
   const session = await verifySession()
   if (!session) redirect('/login')
 
-  const slides = await prisma.heroSlide.findMany({ orderBy: { order: 'asc' } })
+  const slides = await getAdminHeroSlides()
 
   return (
     <div>

@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest'
-import { NextResponse } from 'next/server'
+import { describe, it, expect } from 'vitest'
+import { NextResponse, NextRequest } from 'next/server'
 import { requireAuth, requireAdmin } from '@/lib/auth/require-auth'
-import { encrypt } from '@/lib/auth/session'
+import { encrypt, SessionPayload } from '@/lib/auth/session'
 
-const createMockRequest = (cookieValue?: string) => {
+const createMockRequest = (cookieValue?: string): NextRequest => {
   const cookies = new Map<string, string>()
   if (cookieValue !== undefined) {
     cookies.set('session', cookieValue)
@@ -12,14 +12,14 @@ const createMockRequest = (cookieValue?: string) => {
     cookies: {
       get: (name: string) => cookies.get(name) ? { value: cookies.get(name)! } : undefined,
     },
-  } as any
+  } as NextRequest
 }
 
 describe('requireAuth', () => {
   it('returns payload for valid token', async () => {
     const token = encrypt({ userId: '1', email: 'admin@example.com', role: 'ADMIN' })
     const req = createMockRequest(token)
-    const payload = await requireAuth(req)
+    const payload = await requireAuth(req) as SessionPayload
     expect(payload.userId).toBe('1')
     expect(payload.email).toBe('admin@example.com')
     expect(payload.role).toBe('ADMIN')
@@ -47,14 +47,14 @@ describe('requireAdmin', () => {
   it('returns payload for admin token', async () => {
     const token = encrypt({ userId: '1', email: 'admin@example.com', role: 'ADMIN' })
     const req = createMockRequest(token)
-    const payload = await requireAdmin(req)
+    const payload = await requireAdmin(req) as SessionPayload
     expect(payload.userId).toBe('1')
     expect(payload.email).toBe('admin@example.com')
     expect(payload.role).toBe('ADMIN')
   })
 
   it('returns 403 for non-admin token', async () => {
-    const token = encrypt({ userId: '2', email: 'user@example.com', role: 'USER' })
+    const token = encrypt({ userId: '2', email: 'user@example.com', role: 'EDITOR' })
     const req = createMockRequest(token)
     const result = await requireAdmin(req)
     expect(result).toBeInstanceOf(NextResponse)

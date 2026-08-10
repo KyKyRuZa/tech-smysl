@@ -60,7 +60,6 @@ const Testimonials: React.FC<TestimonialsProps> = ({
 }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
   const items = externalItems !== undefined ? externalItems : ITEMS;
-  const isEmpty = items.length === 0;
 
   return (
     <section
@@ -105,7 +104,6 @@ const Testimonials: React.FC<TestimonialsProps> = ({
                 item={item}
                 index={i}
                 editable={editable}
-                onAdd={onAdd}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onToggle={onToggle}
@@ -123,7 +121,6 @@ function TestimonialCard({
   item,
   index,
   editable,
-  onAdd,
   onEdit,
   onDelete,
   onToggle,
@@ -131,7 +128,6 @@ function TestimonialCard({
   item: Testimonial;
   index: number;
   editable?: boolean;
-  onAdd?: () => void;
   onEdit?: (item: Testimonial, index: number) => void;
   onDelete?: (item: Testimonial, index: number) => void;
   onToggle?: (item: Testimonial, index: number) => void;

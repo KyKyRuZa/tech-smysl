@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import BlockControls from '@/components/admin/BlockControls';
+import dynamic from 'next/dynamic';
 import styles from './Hero.module.css';
+
+const BlockControls = dynamic(() => import('@/components/admin/BlockControls'), { ssr: false })
 
 const TYPING_SPEED = 30;
 const PAUSE_DURATION = 3000;
@@ -70,7 +72,6 @@ export default function Hero({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [imageFade, setImageFade] = useState(true);
 
   const active = editable ? activeIndex : currentSlide;
   const currentSlideData = HERO_SLIDES[active];
@@ -97,18 +98,14 @@ export default function Hero({
         }, ERASE_SPEED);
       } else {
         timeout = setTimeout(() => {
-          setImageFade(false);
-          setTimeout(() => {
-            setCurrentSlide((prev) => (prev + 1) % texts.length);
-            setImageFade(true);
-            setIsTyping(true);
-          }, 800);
+          setCurrentSlide((prev) => (prev + 1) % texts.length);
+          setIsTyping(true);
         }, SLIDE_TRANSITION);
       }
     }
 
     return () => clearTimeout(timeout);
-  }, [displayText, isTyping, currentSlide]);
+  }, [displayText, isTyping, currentSlide, HERO_SLIDES, editable]);
 
   const subtitleText = editable ? currentSlideData?.subtitle || '' : displayText;
 

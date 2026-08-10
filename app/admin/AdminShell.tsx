@@ -1,72 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import NavIcon from '@/components/admin/NavIcon'
 import styles from './admin.module.css'
 import { DialogProvider } from '@/components/admin/DialogProvider'
 
-function NavIcon({ name }: { name: string }) {
-  const common = {
-    width: 18,
-    height: 18,
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: 2,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
-  }
-  switch (name) {
-    case 'dashboard':
-      return (
-        <svg {...common}>
-          <rect x="3" y="3" width="7" height="7" />
-          <rect x="14" y="3" width="7" height="7" />
-          <rect x="14" y="14" width="7" height="7" />
-          <rect x="3" y="14" width="7" height="7" />
-        </svg>
-      )
-    case 'blog':
-      return (
-        <svg {...common}>
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        </svg>
-      )
-    case 'projects':
-      return (
-        <svg {...common}>
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-        </svg>
-      )
-    case 'reviews':
-      return (
-        <svg {...common}>
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      )
-    case 'slides':
-      return (
-        <svg {...common}>
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <path d="M3 9h18M9 21V9" />
-        </svg>
-      )
-    case 'editor':
-      return (
-        <svg {...common}>
-          <path d="M12 20h9" />
-          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-        </svg>
-      )
-    default:
-      return null
-  }
-}
-
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+
+  useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Reading localStorage on mount is a legitimate pattern
+    setCollapsed(window.localStorage.getItem('admin-sidebar-collapsed') === 'true')
+  }, [])
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev
+      window.localStorage.setItem('admin-sidebar-collapsed', String(next))
+      return next
+    })
+  }
 
   const navItems = [
     { href: '/admin', label: 'Дашборд', icon: 'dashboard' },
@@ -74,6 +30,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     { href: '/admin/projects', label: 'Проекты', icon: 'projects' },
     { href: '/admin/reviews', label: 'Отзывы', icon: 'reviews' },
     { href: '/admin/hero-slides', label: 'Слайды', icon: 'slides' },
+    { href: '/admin/applications', label: 'Заявки', icon: 'applications' },
     { href: '/admin/edit', label: 'Редактор', icon: 'editor' },
   ]
 
@@ -97,10 +54,24 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {open && <div className={styles.adminBackdrop} onClick={() => setOpen(false)} />}
 
-      <div className={styles.adminLayout}>
-        <aside className={`${styles.adminSidebar} ${open ? styles.open : ''}`}>
+      <div className={`${styles.adminLayout} ${collapsed ? styles.collapsed : ''}`}>
+        <aside className={`${styles.adminSidebar} ${open ? styles.open : ''} ${collapsed ? styles.collapsed : ''}`}>
           <div className={styles.adminSidebarHeader}>
             <div className={styles.adminLogo}>S</div>
+            <button
+              type="button"
+              className={styles.adminCollapseBtn}
+              aria-label={collapsed ? 'Развернуть сайдбар' : 'Свернуть сайдбар'}
+              onClick={toggleCollapsed}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="miter">
+                {collapsed ? (
+                  <path d="M9 18l6-6-6-6" />
+                ) : (
+                  <path d="M15 18l-6-6 6-6" />
+                )}
+              </svg>
+            </button>
           </div>
           <nav className={styles.adminNav}>
             {navItems.map((item) => (
@@ -122,7 +93,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 <span className={styles.adminNavIcon}>
                   <NavIcon name={item.icon} />
                 </span>
-                {item.label}
+                <span className={styles.adminNavLabel}>{item.label}</span>
               </a>
             ))}
           </nav>
@@ -134,7 +105,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   <polyline points="16 17 21 12 16 7" />
                   <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
-                Выход
+                <span className={styles.adminLogoutLabel}>Выход</span>
               </button>
             </form>
           </div>

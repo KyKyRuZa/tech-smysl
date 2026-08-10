@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { useInView } from '@/hooks/useInView';
-import BlockControls from '@/components/admin/BlockControls';
+import { ProjectCard } from './ProjectCard';
 import BlockAddButton from '@/components/admin/BlockAddButton';
 import styles from './Directions.module.css';
 
@@ -96,7 +96,6 @@ const Directions: React.FC<DirectionsProps> = ({
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
 
   const projects = externalProjects !== undefined ? externalProjects : PROJECTS;
-  const isEmpty = projects.length === 0;
 
   const scroll = (direction: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -136,7 +135,6 @@ const Directions: React.FC<DirectionsProps> = ({
                   project={project}
                   index={i}
                   editable={editable}
-                  onAdd={onAdd}
                   onEdit={onEdit}
                   onDelete={onDelete}
                   onToggle={onToggle}
@@ -167,66 +165,5 @@ const Directions: React.FC<DirectionsProps> = ({
     </section>
   );
 };
-
-function ProjectCard({
-  project,
-  index,
-  editable,
-  onAdd,
-  onEdit,
-  onDelete,
-  onToggle,
-}: {
-  project: Project;
-  index: number;
-  editable?: boolean;
-  onAdd?: () => void;
-  onEdit?: (project: Project, index: number) => void;
-  onDelete?: (project: Project, index: number) => void;
-  onToggle?: (project: Project, index: number) => void;
-}) {
-  const { ref, isInView } = useInView({ threshold: 0.1 });
-
-  return (
-    <article
-      ref={ref}
-      className={`${styles.projectCard} ${styles.animateIn} ${editable || isInView ? styles.visible : ''}`}
-      style={editable ? { position: 'relative', opacity: editable && !project.published ? 0.55 : 1 } : undefined}
-    >
-      <Link
-        href={`/projects/${project.slug || project.id}`}
-        className={styles.projectCardLink}
-      >
-        <div className={styles.projectCardMedia}>
-          <img
-            src={project.imageUrl || project.bgImage || '/projects/жк1.webp'}
-            alt={project.title}
-            loading="lazy"
-            decoding="async"
-            width={800}
-            height={600}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/projects/жк1.webp';
-            }}
-          />
-        </div>
-        <div className={styles.projectCardBody}>
-          <h3 className={styles.projectCardTitle}>{project.title}</h3>
-          {project.subtitle && (
-            <p className={styles.projectCardText}>{project.subtitle}</p>
-          )}
-        </div>
-      </Link>
-      {editable && (
-        <BlockControls
-          published={project.published}
-          onEdit={() => onEdit?.(project, index)}
-          onDelete={() => onDelete?.(project, index)}
-          onToggle={() => onToggle?.(project, index)}
-        />
-      )}
-    </article>
-  );
-}
 
 export default Directions;

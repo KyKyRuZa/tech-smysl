@@ -1,7 +1,7 @@
 'use client';
 
 import { useInView } from '@/hooks/useInView';
-import BlockControls from '@/components/admin/BlockControls';
+import { ArticleCard } from './ArticleCard';
 import BlockAddButton from '@/components/admin/BlockAddButton';
 import styles from './Articles.module.css';
 
@@ -64,7 +64,6 @@ const Articles: React.FC<ArticlesProps> = ({
 }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
   const items = externalItems !== undefined ? externalItems : ITEMS;
-  const isEmpty = items.length === 0;
 
   return (
     <section
@@ -96,7 +95,6 @@ const Articles: React.FC<ArticlesProps> = ({
                 item={item}
                 index={i}
                 editable={editable}
-                onAdd={onAdd}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onToggle={onToggle}
@@ -109,48 +107,5 @@ const Articles: React.FC<ArticlesProps> = ({
     </section>
   );
 };
-
-function ArticleCard({
-  item,
-  index,
-  editable,
-  onAdd,
-  onEdit,
-  onDelete,
-  onToggle,
-}: {
-  item: ArticleItem;
-  index: number;
-  editable?: boolean;
-  onAdd?: () => void;
-  onEdit?: (item: ArticleItem, index: number) => void;
-  onDelete?: (item: ArticleItem, index: number) => void;
-  onToggle?: (item: ArticleItem, index: number) => void;
-}) {
-  const { ref, isInView } = useInView({ threshold: 0.1 });
-
-  return (
-    <article
-      ref={ref}
-      className={`${styles.articleCard} ${styles.animateIn} ${editable || isInView ? styles.visible : ''}`}
-      style={editable ? { position: 'relative', opacity: editable && !item.published ? 0.55 : 1 } : undefined}
-    >
-      <span className={styles.readTime}>{item.readTime}</span>
-      <h3 className={styles.articleTitle}>{item.title}</h3>
-      <p className={styles.articleExcerpt}>{item.excerpt}</p>
-      <a href={item.link} className={styles.articleLink}>
-        Все статьи →
-      </a>
-      {editable && (
-        <BlockControls
-          published={item.published}
-          onEdit={() => onEdit?.(item, index)}
-          onDelete={() => onDelete?.(item, index)}
-          onToggle={() => onToggle?.(item, index)}
-        />
-      )}
-    </article>
-  );
-}
 
 export default Articles;

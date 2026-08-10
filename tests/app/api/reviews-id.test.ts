@@ -1,21 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { GET, PUT, DELETE } from '@/app/api/reviews/[id]/route'
-import { prisma } from '@/lib/prisma'
-import { requireAuth } from '@/lib/auth/require-auth'
 
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
+const { mockPrisma, mockRequireAuth } = vi.hoisted(() => ({
+  mockPrisma: {
     review: {
       findUnique: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
     },
   },
+  mockRequireAuth: vi.fn(),
+}))
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: mockPrisma,
 }))
 
 vi.mock('@/lib/auth/require-auth', () => ({
-  requireAuth: vi.fn(),
+  requireAuth: mockRequireAuth,
 }))
 
 vi.mock('@/lib/logger', () => ({
@@ -26,9 +29,6 @@ vi.mock('@/lib/logger', () => ({
   },
 }))
 
-const mockPrisma = vi.mocked(prisma)
-const mockRequireAuth = vi.mocked(requireAuth)
-
 const createMockParams = (id: string) => Promise.resolve({ id })
 
 describe('GET /api/reviews/[id]', () => {
@@ -38,9 +38,9 @@ describe('GET /api/reviews/[id]', () => {
 
   it('returns review by id', async () => {
     const review = { id: '1', headline: 'Great', body: 'Review' }
-    mockPrisma.review.findUnique.mockResolvedValue(review as any)
+    mockPrisma.review.findUnique.mockResolvedValue(review)
 
-    const req = new Request('http://localhost/api/reviews/1') as any
+    const req = new Request('http://localhost/api/reviews/1') as NextRequest
     const response = await GET(req, { params: createMockParams('1') })
     const json = await response.json()
 
@@ -51,7 +51,7 @@ describe('GET /api/reviews/[id]', () => {
   it('returns 404 when review not found', async () => {
     mockPrisma.review.findUnique.mockResolvedValue(null)
 
-    const req = new Request('http://localhost/api/reviews/999') as any
+    const req = new Request('http://localhost/api/reviews/999') as NextRequest
     const res = await GET(req, { params: createMockParams('999') })
     expect(res.status).toBe(404)
   })
@@ -63,20 +63,20 @@ describe('PUT /api/reviews/[id]', () => {
   })
 
   it('updates review for authenticated admin', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: '1', email: 'admin@example.com', role: 'ADMIN' } as any)
-    mockPrisma.review.findUnique.mockResolvedValue({ id: '1', headline: 'Old' } as any)
+    mockRequireAuth.mockResolvedValue({ userId: '1', email: 'admin@example.com', role: 'ADMIN' })
+    mockPrisma.review.findUnique.mockResolvedValue({ id: '1', headline: 'Old' })
     mockPrisma.review.update.mockResolvedValue({
       id: '1',
       headline: 'New',
       body: 'New body',
       order: 0,
-    } as any)
+    })
 
     const req = new Request('http://localhost/api/reviews/1', {
       method: 'PUT',
       body: JSON.stringify({ headline: 'New', body: 'New body' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await PUT(req, { params: createMockParams('1') })
     const json = await response.json()
@@ -93,7 +93,7 @@ describe('PUT /api/reviews/[id]', () => {
       method: 'PUT',
       body: JSON.stringify({ headline: 'New' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await PUT(req, { params: createMockParams('1') })
     expect(response.status).toBe(401)
@@ -106,13 +106,13 @@ describe('DELETE /api/reviews/[id]', () => {
   })
 
   it('deletes review for authenticated admin', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: '1', email: 'admin@example.com', role: 'ADMIN' } as any)
-    mockPrisma.review.findUnique.mockResolvedValue({ id: '1' } as any)
-    mockPrisma.review.delete.mockResolvedValue({ id: '1' } as any)
+    mockRequireAuth.mockResolvedValue({ userId: '1', email: 'admin@example.com', role: 'ADMIN' })
+    mockPrisma.review.findUnique.mockResolvedValue({ id: '1' })
+    mockPrisma.review.delete.mockResolvedValue({ id: '1' })
 
     const req = new Request('http://localhost/api/reviews/1', {
       method: 'DELETE',
-    }) as any
+    }) as NextRequest
 
     const response = await DELETE(req, { params: createMockParams('1') })
     const json = await response.json()

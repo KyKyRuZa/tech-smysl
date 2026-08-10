@@ -1,20 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest, NextResponse } from 'next/server'
 import { GET, POST } from '@/app/api/reviews/route'
-import { prisma } from '@/lib/prisma'
-import { requireAuth } from '@/lib/auth/require-auth'
 
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
+const { mockPrisma, mockRequireAuth } = vi.hoisted(() => ({
+  mockPrisma: {
     review: {
       findMany: vi.fn(),
       create: vi.fn(),
     },
   },
+  mockRequireAuth: vi.fn(),
+}))
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: mockPrisma,
 }))
 
 vi.mock('@/lib/auth/require-auth', () => ({
-  requireAuth: vi.fn(),
+  requireAuth: mockRequireAuth,
 }))
 
 vi.mock('@/lib/logger', () => ({
@@ -25,9 +28,6 @@ vi.mock('@/lib/logger', () => ({
   },
 }))
 
-const mockPrisma = vi.mocked(prisma)
-const mockRequireAuth = vi.mocked(requireAuth)
-
 describe('GET /api/reviews', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -35,9 +35,9 @@ describe('GET /api/reviews', () => {
 
   it('returns only published reviews by default', async () => {
     const reviews = [{ id: '1', headline: 'Great', published: true }]
-    mockPrisma.review.findMany.mockResolvedValue(reviews as any)
+    mockPrisma.review.findMany.mockResolvedValue(reviews)
 
-    const req = new Request('http://localhost/api/reviews') as any
+    const req = new Request('http://localhost/api/reviews') as NextRequest
     const response = await GET(req)
     const json = await response.json()
 
@@ -54,9 +54,9 @@ describe('GET /api/reviews', () => {
       { id: '1', headline: 'Great', published: true },
       { id: '2', headline: 'Bad', published: false },
     ]
-    mockPrisma.review.findMany.mockResolvedValue(reviews as any)
+    mockPrisma.review.findMany.mockResolvedValue(reviews)
 
-    const req = new Request('http://localhost/api/reviews?all=true') as any
+    const req = new Request('http://localhost/api/reviews?all=true') as NextRequest
     const response = await GET(req)
     const json = await response.json()
 
@@ -71,7 +71,7 @@ describe('GET /api/reviews', () => {
   it('returns 500 on database error', async () => {
     mockPrisma.review.findMany.mockRejectedValue(new Error('DB error'))
 
-    const req = new Request('http://localhost/api/reviews') as any
+    const req = new Request('http://localhost/api/reviews') as NextRequest
     const response = await GET(req)
     const json = await response.json()
 
@@ -87,19 +87,19 @@ describe('POST /api/reviews', () => {
 
   it('creates review for authenticated admin', async () => {
     const payload = { userId: '1', email: 'admin@example.com', role: 'ADMIN' as const }
-    mockRequireAuth.mockResolvedValue(payload as any)
+    mockRequireAuth.mockResolvedValue(payload)
     mockPrisma.review.create.mockResolvedValue({
       id: '1',
       headline: 'Great',
       body: 'Review text',
       order: 0,
-    } as any)
+    })
 
     const req = new Request('http://localhost/api/reviews', {
       method: 'POST',
       body: JSON.stringify({ headline: 'Great', body: 'Review text' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await POST(req)
     const json = await response.json()
@@ -117,20 +117,20 @@ describe('POST /api/reviews', () => {
       method: 'POST',
       body: JSON.stringify({ headline: 'Great', body: 'Review' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await POST(req)
     expect(response.status).toBe(401)
   })
 
   it('returns 400 for invalid body', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: '1', email: 'admin@example.com', role: 'ADMIN' } as any)
+    mockRequireAuth.mockResolvedValue({ userId: '1', email: 'admin@example.com', role: 'ADMIN' })
 
     const req = new Request('http://localhost/api/reviews', {
       method: 'POST',
       body: JSON.stringify({ headline: '' }),
       headers: { 'Content-Type': 'application/json' },
-    }) as any
+    }) as NextRequest
 
     const response = await POST(req)
     expect(response.status).toBe(400)
