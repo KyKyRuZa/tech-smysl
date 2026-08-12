@@ -7,10 +7,27 @@ import { AppError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { requireAuth } from '@/lib/auth/require-auth'
 
-const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploads')
+const baseUploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploads')
+
+const ALLOWED_FOLDERS = [
+  'projects',
+  'blog-posts',
+  'reviews',
+  'hero-slides',
+  'avatars',
+  'general',
+] as const
+type UploadFolder = (typeof ALLOWED_FOLDERS)[number]
 
 const MAX_SIZE = 5 * 1024 * 1024
 const ALLOWED_FORMATS = new Set(['jpeg', 'png', 'webp', 'gif'])
+
+function resolveFolder(raw: unknown): UploadFolder {
+  if (typeof raw === 'string' && (ALLOWED_FOLDERS as readonly string[]).includes(raw)) {
+    return raw as UploadFolder
+  }
+  return 'general'
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +36,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get('image') as File | null
+    const folder = resolveFolder(formData.get('folder'))
 
     if (!file) {
       throw new AppError(400, 'No file uploaded')
@@ -43,18 +61,18 @@ export async function POST(request: NextRequest) {
     }
 
     const filename = `${randomUUID()}.webp`
-    const outputPath = path.join(uploadDir, filename)
+    const uploadDir = path.join(baseUploadDir, folder)
 
     await mkdir(uploadDir, { recursive: true })
     await sharp(buffer)
       .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 80 })
-      .toFile(outputPath)
+      .toFile(path.join(uploadDir, filename))
 
-    const url = `/uploads/${filename}`
+    const url = `/uploads/${folder}/${filename}`
 
-    logger.info('Image uploaded and processed', { filename })
-    return NextResponse.json({ url, filename }, { status: 201 })
+    logger.info('Image uploaded and processed', { folder, filename })
+    return NextResponse.json({ url, filename, folder }, { status: 201 })
   } catch (error) {
     if (error instanceof AppError) {
       logger.warn('Upload validation error', { statusCode: error.statusCode, message: error.message })

@@ -10,22 +10,15 @@ async function main() {
     throw new Error('DEFAULT_ADMIN_PASSWORD is not set. Refusing to seed with a known default password.')
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } })
-  if (existing) {
-    logger.info('Seed skipped: admin already exists', { email })
-  } else {
-    const passwordHash = await bcrypt.hash(password, 12)
+  const passwordHash = await bcrypt.hash(password, 12)
 
-    await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        role: Role.ADMIN,
-      },
-    })
+  await prisma.user.upsert({
+    where: { email },
+    update: { passwordHash, role: Role.ADMIN },
+    create: { email, passwordHash, role: Role.ADMIN },
+  })
 
-    logger.info('Admin seeded', { email })
-  }
+  logger.info('Admin seeded/updated', { email })
 
   const imageUrl = '/example/default.webp'
 

@@ -22,9 +22,10 @@ interface AdminFormProps {
   redirectPath: string
 }
 
-async function uploadFile(file: File): Promise<string> {
+async function uploadFile(file: File, folder: string): Promise<string> {
   const formData = new FormData()
   formData.append('image', file)
+  formData.append('folder', folder)
   const res = await fetch('/api/upload', { method: 'POST', body: formData })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
@@ -53,7 +54,7 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
       for (const input of Array.from(fileInputs)) {
         const file = input.files?.[0]
         if (file) {
-          jsonData[input.name] = await uploadFile(file)
+          jsonData[input.name] = await uploadFile(file, entity)
         } else if (input.dataset.currentUrl) {
           jsonData[input.name] = input.dataset.currentUrl
         }

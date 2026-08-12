@@ -23,9 +23,19 @@ describe('Security: URL field validation', () => {
       expect(heroSlideSchema.safeParse({ ...base, ctaLink: 'http://example.com' }).success).toBe(true)
     })
 
+    it('accepts relative links (plain words, no scheme)', () => {
+      expect(heroSlideSchema.safeParse({ ...base, ctaLink: 'test' }).success).toBe(true)
+      expect(heroSlideSchema.safeParse({ ...base, ctaLink: 'contacts' }).success).toBe(true)
+    })
+
     it('accepts in-page anchors and absolute paths', () => {
       expect(heroSlideSchema.safeParse({ ...base, ctaLink: '#projects' }).success).toBe(true)
       expect(heroSlideSchema.safeParse({ ...base, ctaLink: '/internal/page' }).success).toBe(true)
+    })
+
+    it('rejects unknown/unsafe schemes', () => {
+      expect(heroSlideSchema.safeParse({ ...base, ctaLink: 'vbscript:msgbox' }).success).toBe(false)
+      expect(heroSlideSchema.safeParse({ ...base, ctaLink: 'file:///etc/passwd' }).success).toBe(false)
     })
 
     it('accepts mailto/tel', () => {
@@ -35,6 +45,13 @@ describe('Security: URL field validation', () => {
 
     it('allows omission (optional)', () => {
       expect(heroSlideSchema.safeParse(base).success).toBe(true)
+    })
+
+    it('treats empty string as "no URL" (form default)', () => {
+      expect(heroSlideSchema.safeParse({ ...base, ctaLink: '' }).success).toBe(true)
+      expect(
+        heroSlideSchema.safeParse({ ...base, ctaLink: '  ' }).success
+      ).toBe(true)
     })
   })
 

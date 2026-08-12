@@ -1,21 +1,26 @@
 import { z } from 'zod'
 
+const DANGEROUS_SCHEMES = ['javascript:', 'data:', 'vbscript:', 'file:']
+
 const safeUrlSchema = z
   .string()
   .trim()
   .refine(
     (value) => {
-      if (value.startsWith('#') || value.startsWith('/')) return true
-      try {
-        const parsed = new URL(value)
-        return ['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol)
-      } catch {
-        return false
+      if (!value) return true
+      const lower = value.toLowerCase()
+      if (DANGEROUS_SCHEMES.some((scheme) => lower.startsWith(scheme))) return false
+      const colon = value.indexOf(':')
+      if (colon > 0) {
+        const scheme = lower.slice(0, colon)
+        return ['http', 'https', 'mailto', 'tel'].includes(scheme)
       }
+      return true
     },
     { message: 'Недопустимый URL' }
   )
   .optional()
+  .transform((value) => (value === '' ? undefined : value))
 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email'),

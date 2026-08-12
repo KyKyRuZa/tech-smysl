@@ -1,22 +1,9 @@
 import styles from './page.module.css'
-import { prisma } from '@/lib/prisma'
+import { getPublicBlogPosts } from '@/lib/public-queries'
 import Image from 'next/image'
 
-export const dynamic = 'force-dynamic'
-
 export default async function Blog() {
-  const posts = await prisma.blogPost.findMany({
-    where: { published: true },
-    orderBy: { publishedAt: 'desc' },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      excerpt: true,
-      imageUrl: true,
-      publishedAt: true,
-    },
-  })
+  const posts = await getPublicBlogPosts()
 
   return (
     <div className={styles.container}>

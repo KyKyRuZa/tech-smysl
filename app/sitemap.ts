@@ -1,18 +1,12 @@
 import { MetadataRoute } from 'next'
-import { prisma } from '@/lib/prisma'
+import { getSitemapProjects, getSitemapBlogPosts } from '@/lib/public-queries'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'
 
   const [projects, blogPosts] = await Promise.all([
-    prisma.project.findMany({
-      where: { published: true },
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.blogPost.findMany({
-      where: { published: true },
-      select: { slug: true, updatedAt: true },
-    }),
+    getSitemapProjects(),
+    getSitemapBlogPosts(),
   ])
 
   const routes = [

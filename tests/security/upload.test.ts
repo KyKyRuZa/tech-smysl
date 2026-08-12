@@ -34,9 +34,10 @@ vi.mock('sharp', () => ({ default: vi.fn(() => mockSharpInstance) }))
 const authorized = { userId: '1', email: 'admin@example.com', role: 'ADMIN' as const }
 const unauthorized = NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-function buildRequest(file: File): NextRequest {
+function buildRequest(file: File, folder = 'general'): NextRequest {
   const fd = new FormData()
   fd.append('image', file)
+  fd.append('folder', folder)
   return new NextRequest('http://localhost/api/upload', {
     method: 'POST',
     body: fd,
@@ -85,9 +86,34 @@ describe('Security: file upload', () => {
     const json = await res.json()
     expect(res.status).toBe(201)
     expect(json.filename).toBe('uuid-123.webp')
-    expect(json.url).toBe('/uploads/uuid-123.webp')
+    expect(json.url).toBe('/uploads/general/uuid-123.webp')
     expect(json.filename).not.toMatch(/\.html$/)
     expect(json.filename).not.toContain('original')
+  })
+
+  it('routes into a category subfolder when folder is supplied', async () => {
+    mockRequireAuth.mockResolvedValue(authorized)
+    mockSharpInstance.metadata.mockResolvedValue({ format: 'png' })
+    const res = await uploadPost(
+      buildRequest(new File(['x'], 'p.png', { type: 'image/png' }), 'projects')
+    )
+    const json = await res.json()
+    expect(res.status).toBe(201)
+    expect(json.folder).toBe('projects')
+    expect(json.url).toBe('/uploads/projects/uuid-123.webp')
+  })
+
+  it('falls back to the general folder for unknown/invalid folder names', async () => {
+    mockRequireAuth.mockResolvedValue(authorized)
+    mockSharpInstance.metadata.mockResolvedValue({ format: 'png' })
+    const res = await uploadPost(
+      buildRequest(new File(['x'], 'p.png', { type: 'image/png' }), '../../etc')
+    )
+    const json = await res.json()
+    expect(res.status).toBe(201)
+    expect(json.folder).toBe('general')
+    expect(json.url).toBe('/uploads/general/uuid-123.webp')
+    expect(json.url).not.toContain('..')
   })
 
   it('uses a random uuid filename, ignoring the client-provided name', async () => {
@@ -98,5 +124,6 @@ describe('Security: file upload', () => {
     )
     const json = await res.json()
     expect(json.filename).toBe('uuid-123.webp')
+    expect(json.url).toBe('/uploads/general/uuid-123.webp')
   })
 })

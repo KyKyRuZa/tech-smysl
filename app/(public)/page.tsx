@@ -6,7 +6,7 @@ import Testimonials, { type Testimonial } from '@/components/sections/Testimonia
 import Articles, { type ArticleItem } from '@/components/sections/Articles'
 // import CTA from '@/components/sections/CTA'
 import ContactSection from './ContactSection'
-import { prisma } from '@/lib/prisma'
+import { getPublicHeroSlides, getPublicProjects, getPublicReviews, getPublicBlogPosts } from '@/lib/public-queries'
 
 function estimateReadTime(content: string | null | undefined): string {
   const words = (content ?? '').trim().split(/\s+/).filter(Boolean).length
@@ -16,24 +16,10 @@ function estimateReadTime(content: string | null | undefined): string {
 
 export default async function Home() {
   const [slides, projects, reviews, posts] = await Promise.all([
-    prisma.heroSlide.findMany({
-      where: { published: true },
-      orderBy: { order: 'asc' },
-      select: { imageUrl: true, imageAlt: true, subtitle: true },
-    }),
-    prisma.project.findMany({
-      where: { published: true },
-      orderBy: { order: 'asc' },
-    }),
-    prisma.review.findMany({
-      where: { published: true },
-      orderBy: { order: 'asc' },
-    }),
-    prisma.blogPost.findMany({
-      where: { published: true },
-      orderBy: { publishedAt: 'desc' },
-      take: 3,
-    }),
+    getPublicHeroSlides(),
+    getPublicProjects(),
+    getPublicReviews(),
+    getPublicBlogPosts(),
   ])
 
   const heroSlides: HeroSlideData[] = slides.map((s) => ({

@@ -1,9 +1,7 @@
 import styles from '../page.module.css'
-import { prisma } from '@/lib/prisma'
+import { getPublicProjectBySlug } from '@/lib/public-queries'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-
-export const dynamic = 'force-dynamic'
 
 export default async function ProjectDetail({
   params,
@@ -11,9 +9,7 @@ export default async function ProjectDetail({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const project = await prisma.project.findUnique({
-    where: { slug },
-  })
+  const project = await getPublicProjectBySlug(slug)
 
   if (!project || !project.published) {
     notFound()

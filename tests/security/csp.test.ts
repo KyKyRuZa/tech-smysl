@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { proxy } from '@/proxy'
 
 const { mockDecrypt } = vi.hoisted(() => ({ mockDecrypt: vi.fn() }))
@@ -8,11 +8,6 @@ vi.mock('@/lib/auth/session', () => ({ decrypt: mockDecrypt }))
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }))
-
-const sessionCookie = (token: string) =>
-  new NextRequest('http://localhost/', {
-    headers: { cookie: `session=${token}` },
-  })
 
 function scriptSrc(csp: string | null): string {
   if (!csp) return ''
@@ -24,17 +19,14 @@ function scriptSrc(csp: string | null): string {
 }
 
 describe('Security: CSP and HSTS (proxy)', () => {
-  let originalEnv: string | undefined
-
   beforeEach(() => {
     vi.clearAllMocks()
-    originalEnv = process.env.NODE_ENV
     vi.stubGlobal('crypto', { randomUUID: () => 'nonce-test123' })
   })
 
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv
     vi.unstubAllGlobals()
+    vi.unstubAllEnvs()
   })
 
   it('sets a nonce-based CSP with no unsafe-inline/unsafe-eval on documents', async () => {
@@ -58,14 +50,14 @@ describe('Security: CSP and HSTS (proxy)', () => {
   })
 
   it('omits HSTS outside production', async () => {
-    process.env.NODE_ENV = 'test'
+    vi.stubEnv('NODE_ENV', 'test')
     mockDecrypt.mockReturnValue({ userId: '1', email: 'a@b.c', role: 'ADMIN' })
     const res = await proxy(new NextRequest('http://localhost/'))
     expect(res.headers.get('strict-transport-security')).toBeNull()
   })
 
   it('sets HSTS in production', async () => {
-    process.env.NODE_ENV = 'production'
+    vi.stubEnv('NODE_ENV', 'production')
     mockDecrypt.mockReturnValue({ userId: '1', email: 'a@b.c', role: 'ADMIN' })
     const res = await proxy(new NextRequest('http://localhost/'))
     expect(res.headers.get('strict-transport-security')).toBe(

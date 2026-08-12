@@ -378,9 +378,10 @@ export default function VisualEditor({
   )
 }
 
-async function uploadFile(file: File): Promise<string> {
+async function uploadFile(file: File, folder: string): Promise<string> {
   const formData = new FormData()
   formData.append('image', file)
+  formData.append('folder', folder)
   const res = await fetch('/api/upload', { method: 'POST', body: formData })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
@@ -441,7 +442,7 @@ function EntityPanel({
       for (const field of fields) {
         if (field.type === 'file') {
           if (files[field.name]) {
-            payload[field.name] = await uploadFile(files[field.name])
+            payload[field.name] = await uploadFile(files[field.name], entity)
           } else if (form[field.name]) {
             payload[field.name] = form[field.name]
           }

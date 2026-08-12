@@ -1,14 +1,9 @@
 import styles from './page.module.css'
-import { prisma } from '@/lib/prisma'
+import { getPublicProjects } from '@/lib/public-queries'
 import Image from 'next/image'
 
-export const dynamic = 'force-dynamic'
-
 export default async function Projects() {
-  const projects = await prisma.project.findMany({
-    where: { published: true },
-    orderBy: { order: 'asc' },
-  })
+  const projects = await getPublicProjects()
 
   return (
     <div className={styles.container}>
