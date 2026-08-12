@@ -48,6 +48,11 @@ interface TestimonialsProps {
   onEdit?: (item: Testimonial, index: number) => void;
   onDelete?: (item: Testimonial, index: number) => void;
   onToggle?: (item: Testimonial, index: number) => void;
+  title?: string;
+  titleLine2?: string;
+  note?: string;
+  allReviewsText?: string;
+  emptyText?: string;
 }
 
 const Testimonials: React.FC<TestimonialsProps> = ({
@@ -57,6 +62,11 @@ const Testimonials: React.FC<TestimonialsProps> = ({
   onEdit,
   onDelete,
   onToggle,
+  title,
+  titleLine2,
+  note,
+  allReviewsText,
+  emptyText,
 }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
   const items = externalItems !== undefined ? externalItems : ITEMS;
@@ -72,9 +82,9 @@ const Testimonials: React.FC<TestimonialsProps> = ({
             <h2
               className={`${styles.testimonialsTitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
             >
-              Истории успеха
+              {title ?? 'Истории успеха'}
               <br />
-              от 50+ клиентов
+              {titleLine2 ?? 'от 50+ клиентов'}
             </h2>
           </div>
           <div
@@ -83,20 +93,20 @@ const Testimonials: React.FC<TestimonialsProps> = ({
           >
             <span className={styles.testimonialsStar}>★ 4.8</span>
             <p className={styles.testimonialsNote}>
-              Более 50 успешных проектов по веб-разработке, мобильным приложениям и AI
+              {note ?? 'Более 50 успешных проектов по веб-разработке, мобильным приложениям и AI'}
             </p>
           </div>
         </div>
 
         <div className={styles.tAllBtn}>
           <a href="#" className="btn-outline-sm">
-            Все отзывы
+            {allReviewsText ?? 'Все отзывы'}
           </a>
         </div>
 
         <div className={styles.testimonialsGrid}>
           {items.length === 0 ? (
-            <p className={styles.empty}>Пока нет отзывов</p>
+            <p className={styles.empty}>{emptyText ?? 'Пока нет отзывов'}</p>
           ) : (
             items.map((item, i) => (
               <TestimonialCard

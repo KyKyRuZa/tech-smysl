@@ -55,6 +55,10 @@ interface HeroProps {
   onDelete?: () => void;
   onToggle?: () => void;
   slidePublished?: boolean;
+  eyebrow?: string;
+  title?: string;
+  ctaText?: string;
+  microNote?: string;
 }
 
 export default function Hero({
@@ -67,6 +71,10 @@ export default function Hero({
   onDelete,
   onToggle,
   slidePublished,
+  eyebrow,
+  title,
+  ctaText,
+  microNote,
 }: HeroProps) {
   const HERO_SLIDES: HeroSlideData[] = slides && slides.length > 0 ? slides : DEFAULT_HERO_SLIDES;
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -130,18 +138,18 @@ export default function Hero({
         <div className={styles.heroText}>
           <div className={styles.heroEyebrowWrap}>
             <span className={styles.heroEyebrowBar} />
-            <span className={styles.heroEyebrow}>Начнём работать вместе прямо сейчас</span>
+            <span className={styles.heroEyebrow}>{eyebrow ?? 'Начнём работать вместе прямо сейчас'}</span>
           </div>
 
-          <h1 className={styles.heroTitle}>Техсмысл: +30 IT-решений ежегодно</h1>
+          <h1 className={styles.heroTitle}>{title ?? 'Техсмысл: +30 IT-решений ежегодно'}</h1>
 
           <p className={styles.heroSub}>{subtitleText}</p>
 
           <div className={styles.heroActions}>
             <button type="button" className={styles.btnRed}>
-              Обсудить проект
+              {ctaText ?? 'Обсудить проект'}
             </button>
-            <span className={styles.microNote}>Ответ в течение 15 минут · Можно в Telegram</span>
+            <span className={styles.microNote}>{microNote ?? 'Ответ в течение 15 минут · Можно в Telegram'}</span>
           </div>
         </div>
       </div>

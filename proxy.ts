@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { decrypt } from '@/lib/auth/session'
 import { logger } from '@/lib/logger'
+import { locales, defaultLocale, getLocaleFromPath, isValidLocale } from '@/lib/i18n/get-locale'
 
 const protectedRoutes = ['/admin']
 const publicRoutes = ['/login']
@@ -75,11 +76,22 @@ function buildCsp(nonce: string): string {
   return csp.replace(/\s{2,}/g, ' ').trim()
 }
 
+function isAssetPath(pathname: string): boolean {
+  return (
+    pathname.startsWith('/_next') ||
+    pathname.includes('.') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/admin')
+  )
+}
+
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  if (pathname.startsWith('/_next') || pathname.includes('.')) {
-    return NextResponse.next()
+  if (isAssetPath(pathname)) {
+    const res = NextResponse.next()
+    applyCommonHeaders(req, res)
+    return res
   }
 
   const nonce = crypto.randomUUID()
@@ -117,6 +129,16 @@ export async function proxy(req: NextRequest) {
     return res
   }
 
+  const currentLocale = getLocaleFromPath(pathname)
+
+  if (!currentLocale) {
+    const cookieLocale = req.cookies.get('NEXT_LOCALE')?.value
+    const target = cookieLocale && isValidLocale(cookieLocale) ? cookieLocale : defaultLocale
+    const url = req.nextUrl.clone()
+    url.pathname = `/${target}${pathname}`
+    return NextResponse.redirect(url)
+  }
+
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
   const isPublicRoute = publicRoutes.some(route => pathname === route)
 
@@ -152,6 +174,13 @@ export async function proxy(req: NextRequest) {
     res.headers.set(key, value)
   }
   return res
+}
+
+function applyCommonHeaders(req: NextRequest, res: NextResponse) {
+  const corsHeaders = getCorsHeaders(req)
+  for (const [key, value] of Object.entries(corsHeaders)) {
+    res.headers.set(key, value)
+  }
 }
 
 export const config = {

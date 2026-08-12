@@ -45,9 +45,11 @@ const STEPS: ProcessStep[] = [
 
 interface ProcessProps {
   steps?: ProcessStep[];
+  title?: string;
+  subtitle?: string;
 }
 
-const Process: React.FC<ProcessProps> = ({ steps: externalSteps }) => {
+const Process: React.FC<ProcessProps> = ({ steps: externalSteps, title, subtitle }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
 
   const steps = useMemo(() => {
@@ -65,13 +67,13 @@ const Process: React.FC<ProcessProps> = ({ steps: externalSteps }) => {
           <h2
             className={`${styles.processTitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
           >
-            Как мы работаем
+            {title ?? 'Как мы работаем'}
           </h2>
           <p
             className={`${styles.processSubtitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
             style={{ transitionDelay: '0.1s' }}
           >
-            Четыре этапа от идеи до запуска
+            {subtitle ?? 'Четыре этапа от идеи до запуска'}
           </p>
         </div>
 

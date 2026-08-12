@@ -52,6 +52,10 @@ interface ArticlesProps {
   onEdit?: (item: ArticleItem, index: number) => void;
   onDelete?: (item: ArticleItem, index: number) => void;
   onToggle?: (item: ArticleItem, index: number) => void;
+  title?: string;
+  subtitle?: string;
+  emptyText?: string;
+  readMoreText?: string;
 }
 
 const Articles: React.FC<ArticlesProps> = ({
@@ -61,6 +65,10 @@ const Articles: React.FC<ArticlesProps> = ({
   onEdit,
   onDelete,
   onToggle,
+  title,
+  subtitle,
+  emptyText,
+  readMoreText,
 }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
   const items = externalItems !== undefined ? externalItems : ITEMS;
@@ -75,19 +83,19 @@ const Articles: React.FC<ArticlesProps> = ({
           <h2
             className={`${styles.articlesTitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
           >
-            Полезное
+            {title ?? 'Полезное'}
           </h2>
           <p
             className={`${styles.articlesSubtitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
             style={{ transitionDelay: '0.1s' }}
           >
-            Гайды и статьи по разработке
+            {subtitle ?? 'Гайды и статьи по разработке'}
           </p>
         </div>
 
         <div className={styles.articlesGrid}>
           {items.length === 0 ? (
-            <p className={styles.empty}>Пока нет статей</p>
+            <p className={styles.empty}>{emptyText ?? 'Пока нет статей'}</p>
           ) : (
             items.map((item, i) => (
               <ArticleCard

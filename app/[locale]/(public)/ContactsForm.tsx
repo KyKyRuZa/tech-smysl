@@ -3,7 +3,15 @@
 import { useState } from 'react'
 import styles from './ContactsForm.module.css'
 
-const SERVICES = [
+const SERVICES_EN = [
+  { value: '', label: 'Select service' },
+  { value: 'web', label: 'Web development' },
+  { value: 'mobile', label: 'Mobile app' },
+  { value: 'ar3d', label: 'AR / 3D visualization' },
+  { value: 'other', label: 'Other' },
+]
+
+const SERVICES_RU = [
   { value: '', label: 'Выберите направление' },
   { value: 'web', label: 'Веб-разработка' },
   { value: 'mobile', label: 'Мобильное приложение' },
@@ -13,10 +21,31 @@ const SERVICES = [
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
-export default function ContactsForm() {
+type Props = {
+  locale: 'ru' | 'en'
+}
+
+export default function ContactsForm({ locale }: Props) {
   const [status, setStatus] = useState<Status>('idle')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [serverError, setServerError] = useState('')
+
+  const SERVICES = locale === 'en' ? SERVICES_EN : SERVICES_RU
+
+  const labels = {
+    name: locale === 'en' ? 'Name' : 'Имя',
+    email: locale === 'en' ? 'Email' : 'Email',
+    phone: locale === 'en' ? 'Phone' : 'Телефон',
+    service: locale === 'en' ? 'Service' : 'Услуга',
+    message: locale === 'en' ? 'Message' : 'Сообщение',
+    send: locale === 'en' ? 'Send application' : 'Отправить заявку',
+    sending: locale === 'en' ? 'Sending…' : 'Отправляем…',
+    successTitle: locale === 'en' ? 'Application sent!' : 'Заявка отправлена!',
+    successText: locale === 'en'
+      ? 'Thank you! We will contact you within 15 minutes.'
+      : 'Спасибо! Мы свяжемся с вами в течение 15 минут.',
+    serverError: locale === 'en' ? 'Failed to send application' : 'Не удалось отправить заявку',
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -52,7 +81,7 @@ export default function ContactsForm() {
           setStatus('idle')
           return
         }
-        setServerError(data.error || 'Не удалось отправить заявку')
+        setServerError(data.error || labels.serverError)
         setStatus('error')
         return
       }
@@ -60,7 +89,7 @@ export default function ContactsForm() {
       setStatus('success')
       form.reset()
     } catch {
-      setServerError('Не удалось отправить заявку')
+      setServerError(labels.serverError)
       setStatus('error')
     }
   }
@@ -68,9 +97,9 @@ export default function ContactsForm() {
   if (status === 'success') {
     return (
       <div className={styles.success}>
-        <h3 className={styles.successTitle}>Заявка отправлена!</h3>
+        <h3 className={styles.successTitle}>{labels.successTitle}</h3>
         <p className={styles.successText}>
-          Спасибо! Мы свяжемся с вами в течение 15 минут.
+          {labels.successText}
         </p>
       </div>
     )
@@ -80,14 +109,14 @@ export default function ContactsForm() {
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="name">
-          Имя <span className={styles.required}>*</span>
+          {labels.name} <span className={styles.required}>*</span>
         </label>
         <input
           id="name"
           name="name"
           type="text"
           className={styles.input}
-          placeholder="Как к вам обращаться"
+          placeholder={locale === 'en' ? 'How to address you' : 'Как к вам обращаться'}
           autoComplete="name"
         />
         {errors.name && <span className={styles.error}>{errors.name}</span>}
@@ -96,7 +125,7 @@ export default function ContactsForm() {
       <div className={styles.row}>
         <div className={styles.field}>
           <label className={styles.label} htmlFor="email">
-            Email <span className={styles.required}>*</span>
+            {labels.email} <span className={styles.required}>*</span>
           </label>
           <input
             id="email"
@@ -111,7 +140,7 @@ export default function ContactsForm() {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="phone">
-            Телефон
+            {labels.phone}
           </label>
           <input
             id="phone"
@@ -127,7 +156,7 @@ export default function ContactsForm() {
 
       <div className={styles.field}>
         <label className={styles.label} htmlFor="service">
-          Услуга
+          {labels.service}
         </label>
         <select id="service" name="service" className={styles.input}>
           {SERVICES.map((s) => (
@@ -141,14 +170,14 @@ export default function ContactsForm() {
 
       <div className={styles.field}>
         <label className={styles.label} htmlFor="message">
-          Сообщение <span className={styles.required}>*</span>
+          {labels.message} <span className={styles.required}>*</span>
         </label>
         <textarea
           id="message"
           name="message"
           className={styles.textarea}
           rows={5}
-          placeholder="Кратко опишите задачу"
+          placeholder={locale === 'en' ? 'Briefly describe your task' : 'Кратко опишите задачу'}
         />
         {errors.message && <span className={styles.error}>{errors.message}</span>}
       </div>
@@ -158,7 +187,7 @@ export default function ContactsForm() {
       )}
 
       <button type="submit" className={`btn btn-primary ${styles.submit}`} disabled={status === 'loading'}>
-        {status === 'loading' ? 'Отправляем…' : 'Отправить заявку'}
+        {status === 'loading' ? labels.sending : labels.send}
       </button>
     </form>
   )

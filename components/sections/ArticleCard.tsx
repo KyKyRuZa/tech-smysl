@@ -22,6 +22,7 @@ interface ArticleCardProps {
   onEdit?: (item: ArticleItem, index: number) => void;
   onDelete?: (item: ArticleItem, index: number) => void;
   onToggle?: (item: ArticleItem, index: number) => void;
+  readMoreText?: string;
 }
 
 function ArticleCardInner({
@@ -31,6 +32,7 @@ function ArticleCardInner({
   onEdit,
   onDelete,
   onToggle,
+  readMoreText,
 }: ArticleCardProps) {
   const { ref, isInView } = useInView({ threshold: 0.1 });
 
@@ -44,7 +46,7 @@ function ArticleCardInner({
       <h3 className={styles.articleTitle}>{item.title}</h3>
       <p className={styles.articleExcerpt}>{item.excerpt}</p>
       <a href={item.link} className={styles.articleLink}>
-        Все статьи →
+        {readMoreText ?? 'Все статьи →'}
       </a>
       {editable && (
         <BlockControls

@@ -164,7 +164,7 @@ export default function VisualEditor({
     () =>
       articles.map((a, i) => ({
         id: a.id,
-        title: a.title,
+        title: a.title ?? '',
         excerpt: a.excerpt ?? '',
         readTime: '',
         link: '/blog',
@@ -310,8 +310,8 @@ export default function VisualEditor({
         <Directions
           projects={projects.map((p) => ({
             id: p.id,
-            title: p.title,
-            slug: p.slug,
+            title: p.title ?? '',
+            slug: p.slug ?? '',
             subtitle: p.subtitle ?? undefined,
             imageUrl: p.imageUrl ?? undefined,
             bgImage: p.bgImage ?? undefined,
@@ -333,8 +333,8 @@ export default function VisualEditor({
         <Testimonials
           items={reviews.map((r) => ({
             id: r.id,
-            headline: r.headline,
-            body: r.body,
+            headline: r.headline ?? '',
+            body: r.body ?? '',
             author: r.author ?? '',
             role: r.role ?? '',
             published: r.published,

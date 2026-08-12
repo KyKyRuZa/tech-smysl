@@ -25,8 +25,8 @@ enum Role {
 
 model Project {
   id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
+  slug        String?  @unique
+  title       String?
   subtitle    String?
   description String?  @default("")
   content     String?
@@ -42,8 +42,29 @@ model Project {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  translations ProjectTranslation[]
+
   @@index([published, order])
   @@index([slug])
+}
+
+model ProjectTranslation {
+  id          String   @id @default(cuid())
+  locale      String
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  slug        String
+  title       String
+  subtitle    String?
+  description String?
+  content     String?
+  useCases    String?
+  benefits    String[] @default([])
+  tags        String[] @default([])
+
+  @@unique([locale, slug])
+  @@unique([locale, projectId])
+  @@index([locale, slug])
 }
 
 model HeroSlide {
@@ -59,13 +80,28 @@ model HeroSlide {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  translations HeroSlideTranslation[]
+
   @@index([published, order])
+}
+
+model HeroSlideTranslation {
+  id        String   @id @default(cuid())
+  locale    String
+  slideId   String
+  slide     HeroSlide @relation(fields: [slideId], references: [id], onDelete: Cascade)
+  title     String?
+  subtitle  String?
+  ctaText   String?
+  imageAlt  String?
+
+  @@unique([locale, slideId])
 }
 
 model Review {
   id        String   @id @default(cuid())
-  headline  String
-  body      String
+  headline  String?
+  body      String?
   author    String?
   role      String?
   avatarUrl String?
@@ -75,26 +111,59 @@ model Review {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  translations ReviewTranslation[]
+
   @@index([published, order])
+}
+
+model ReviewTranslation {
+  id       String   @id @default(cuid())
+  locale   String
+  reviewId String
+  review   Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  headline String
+  body     String
+  author   String?
+  role     String?
+
+  @@unique([locale, reviewId])
 }
 
 model BlogPost {
   id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
+  slug        String?  @unique
+  title       String?
   excerpt     String?
-  content     String
+  content     String?
   imageUrl    String?
   authorId    String?
-  author      User?    @relation(fields: [authorId], references: [id])
   published   Boolean  @default(false)
   publishedAt DateTime?
   tags        String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  translations BlogPostTranslation[]
+  author       User?    @relation(fields: [authorId], references: [id])
+
   @@index([published, publishedAt])
   @@index([slug])
+}
+
+model BlogPostTranslation {
+  id        String   @id @default(cuid())
+  locale    String
+  postId    String
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  slug      String
+  title     String
+  excerpt   String?
+  content   String
+  tags      String[] @default([])
+
+  @@unique([locale, slug])
+  @@unique([locale, postId])
+  @@index([locale, slug])
 }
 
 model Application {

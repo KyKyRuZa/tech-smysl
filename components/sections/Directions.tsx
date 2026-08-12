@@ -25,6 +25,12 @@ interface DirectionsProps {
   onEdit?: (project: Project, index: number) => void;
   onDelete?: (project: Project, index: number) => void;
   onToggle?: (project: Project, index: number) => void;
+  title?: string;
+  subtitle?: string;
+  allProjectsText?: string;
+  emptyText?: string;
+  prevAria?: string;
+  nextAria?: string;
 }
 
 const PROJECTS: Project[] = [
@@ -91,6 +97,12 @@ const Directions: React.FC<DirectionsProps> = ({
   onEdit,
   onDelete,
   onToggle,
+  title,
+  subtitle,
+  allProjectsText,
+  emptyText,
+  prevAria,
+  nextAria,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
@@ -112,21 +124,21 @@ const Directions: React.FC<DirectionsProps> = ({
       <div className={styles.directionsInner}>
         <div className={styles.directionsHead} ref={headRef}>
           <div className={`${styles.animateIn} ${headVisible ? styles.visible : ''}`}>
-            <h2 className={styles.directionsTitle}>Проекты</h2>
-            <p className={styles.directionsSubtitle}>3D-визуализация, AR и интерактивные решения</p>
+            <h2 className={styles.directionsTitle}>{title ?? 'Проекты'}</h2>
+            <p className={styles.directionsSubtitle}>{subtitle ?? '3D-визуализация, AR и интерактивные решения'}</p>
           </div>
           <Link
             href="/projects"
             className="btn btn-outline-white"
             style={{ opacity: headVisible ? 1 : 0, transform: headVisible ? 'translateY(0)' : 'translateY(10px)', transition: 'opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s' }}
           >
-            Все проекты
+            {allProjectsText ?? 'Все проекты'}
           </Link>
         </div>
 
         <div className={styles.directionsCarouselWrap}>
           {projects.length === 0 ? (
-            <p className={styles.empty}>Пока нет проектов</p>
+            <p className={styles.empty}>{emptyText ?? 'Пока нет проектов'}</p>
           ) : (
             <div className={styles.directionsGrid} ref={scrollRef}>
               {projects.map((project, i) => (
@@ -148,14 +160,14 @@ const Directions: React.FC<DirectionsProps> = ({
           <button
             className={styles.dirArrow}
             onClick={() => scroll('left')}
-            aria-label="Назад"
+            aria-label={prevAria ?? 'Назад'}
           >
             ‹
           </button>
           <button
             className={styles.dirArrow}
             onClick={() => scroll('right')}
-            aria-label="Вперёд"
+            aria-label={nextAria ?? 'Вперёд'}
           >
             ›
           </button>

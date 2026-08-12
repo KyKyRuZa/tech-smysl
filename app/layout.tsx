@@ -36,13 +36,6 @@ export const metadata: Metadata = {
     description: 'IT компания полного цикла: веб-разработка, мобильные приложения, 3D-визуализация, AR и AI-решения.',
     images: ['/og-image.png'],
   },
-  alternates: {
-    canonical: '/',
-    languages: {
-      ru: '/',
-      en: '/en',
-    },
-  },
 }
 
 export default function RootLayout({
