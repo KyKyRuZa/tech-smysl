@@ -80,15 +80,37 @@ export default function Hero({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const active = editable ? activeIndex : currentSlide;
   const currentSlideData = HERO_SLIDES[active];
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (HERO_SLIDES.length === 0) return
+    setCurrentSlide(0)
+    setDisplayText('')
+    setIsTyping(false)
+    setIsTransitioning(false)
+  }, [HERO_SLIDES])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (editable) return;
     let timeout: ReturnType<typeof setTimeout>;
 
     const texts = HERO_SLIDES.map((s) => s.subtitle || '');
+
+    if (isTransitioning) {
+      timeout = setTimeout(() => {
+        setIsTransitioning(false)
+        setCurrentSlide((prev) => (prev + 1) % texts.length)
+        setDisplayText('')
+        setIsTyping(true)
+      }, 800)
+      return () => clearTimeout(timeout)
+    }
+
     const fullText = texts[currentSlide] || '';
 
     if (isTyping) {
@@ -106,14 +128,13 @@ export default function Hero({
         }, ERASE_SPEED);
       } else {
         timeout = setTimeout(() => {
-          setCurrentSlide((prev) => (prev + 1) % texts.length);
-          setIsTyping(true);
+          setIsTransitioning(true)
         }, SLIDE_TRANSITION);
       }
     }
 
     return () => clearTimeout(timeout);
-  }, [displayText, isTyping, currentSlide, HERO_SLIDES, editable]);
+  }, [displayText, isTyping, currentSlide, HERO_SLIDES, editable, isTransitioning]);
 
   const subtitleText = editable ? currentSlideData?.subtitle || '' : displayText;
 
@@ -124,7 +145,7 @@ export default function Hero({
           <Image
             src={currentSlideData.imageUrl}
             alt={currentSlideData.imageAlt || ''}
-            className={styles.heroImg}
+            className={`${styles.heroImg} ${isTransitioning ? styles.fadeOut : ''}`}
             width={1920}
             height={1080}
             fetchPriority="high"

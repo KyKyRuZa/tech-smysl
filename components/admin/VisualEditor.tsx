@@ -16,6 +16,7 @@ import CTA from '@/components/sections/CTA'
 import type { FieldDef } from '@/components/admin/AdminForm'
 import { toSlug } from '@/lib/slug'
 import { useDialog } from '@/components/admin/DialogProvider'
+import { translations } from '@/lib/i18n/translations'
 import styles from './VisualEditor.module.css'
 
 type Entity = 'hero-slides' | 'projects' | 'reviews' | 'blog-posts'
@@ -328,7 +329,10 @@ export default function VisualEditor({
           onToggle={(p) => toggleItem('projects', p.id, p.published)}
         />
 
-        <Process />
+        <Process
+          title={translations.ru.process.title}
+          subtitle={translations.ru.process.subtitle}
+        />
 
         <Testimonials
           items={reviews.map((r) => ({

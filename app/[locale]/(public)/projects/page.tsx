@@ -1,6 +1,7 @@
 import styles from './page.module.css'
 import { getLocalizedProjects } from '@/lib/i18n/queries'
 import Image from 'next/image'
+import Link from 'next/link'
 import { getLocaleFromPath, isValidLocale } from '@/lib/i18n/get-locale'
 import { getTranslations } from '@/lib/i18n/translations'
 import { notFound } from 'next/navigation'
@@ -47,18 +48,20 @@ export default async function Projects({ params }: Props) {
         <ul className={styles.grid}>
           {projects.map((project) => (
             <li key={project.id} className={styles.card}>
-              {project.imageUrl && (
-                <Image
-                  src={project.imageUrl}
-                  alt={project.title}
-                  className={styles.cardImg}
-                  width={800}
-                  height={600}
-                  loading="lazy"
-                />
-              )}
-              <h2 className={styles.cardTitle}>{project.title}</h2>
-              {project.subtitle && <p className={styles.cardText}>{project.subtitle}</p>}
+              <Link href={`/${locale}/projects/${project.slug}`} className={styles.cardLink}>
+                {project.imageUrl && (
+                  <Image
+                    src={project.imageUrl}
+                    alt={project.title}
+                    className={styles.cardImg}
+                    width={800}
+                    height={600}
+                    loading="lazy"
+                  />
+                )}
+                <h2 className={styles.cardTitle}>{project.title}</h2>
+                {project.subtitle && <p className={styles.cardText}>{project.subtitle}</p>}
+              </Link>
             </li>
           ))}
         </ul>

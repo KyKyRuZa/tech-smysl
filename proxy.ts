@@ -136,7 +136,13 @@ export async function proxy(req: NextRequest) {
     const target = cookieLocale && isValidLocale(cookieLocale) ? cookieLocale : defaultLocale
     const url = req.nextUrl.clone()
     url.pathname = `/${target}${pathname}`
-    return NextResponse.redirect(url)
+    const res = NextResponse.redirect(url)
+    res.cookies.set('NEXT_LOCALE', target, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+    })
+    return res
   }
 
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
@@ -169,6 +175,12 @@ export async function proxy(req: NextRequest) {
       res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
     }
   }
+
+  res.cookies.set('NEXT_LOCALE', currentLocale, {
+    path: '/',
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: 'lax',
+  })
 
   for (const [key, value] of Object.entries(corsHeaders)) {
     res.headers.set(key, value)

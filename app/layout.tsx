@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Unbounded, JetBrains_Mono } from 'next/font/google'
+import { isValidLocale } from '@/lib/i18n/get-locale'
+import { cookies } from 'next/headers'
 import './globals.css'
 
 const unbounded = Unbounded({
@@ -38,13 +40,17 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value
+  const lang = isValidLocale(cookieLocale ?? '') ? cookieLocale : 'ru'
+
   return (
-    <html lang="ru" className={`${unbounded.variable} ${jetbrainsMono.variable} antialiased`}>
+    <html lang={lang} className={`${unbounded.variable} ${jetbrainsMono.variable} antialiased`}>
       <body className="min-h-screen flex flex-col">
         {children}
       </body>
