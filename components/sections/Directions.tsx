@@ -31,6 +31,7 @@ interface DirectionsProps {
   emptyText?: string;
   prevAria?: string;
   nextAria?: string;
+  locale?: string
 }
 
 const PROJECTS: Project[] = [
@@ -103,6 +104,7 @@ const Directions: React.FC<DirectionsProps> = ({
   emptyText,
   prevAria,
   nextAria,
+  locale = 'ru',
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
@@ -128,7 +130,7 @@ const Directions: React.FC<DirectionsProps> = ({
             <p className={styles.directionsSubtitle}>{subtitle ?? '3D-визуализация, AR и интерактивные решения'}</p>
           </div>
           <Link
-            href="/projects"
+            href={`/${locale}/projects`}
             className="btn btn-outline-white"
             style={{ opacity: headVisible ? 1 : 0, transform: headVisible ? 'translateY(0)' : 'translateY(10px)', transition: 'opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s' }}
           >

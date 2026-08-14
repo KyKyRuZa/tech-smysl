@@ -88,7 +88,7 @@ export default async function Home({ params }: Props) {
     title: post.title,
     excerpt: post.excerpt ?? '',
     readTime: estimateReadTime(post.content),
-    link: `/${locale}/blog`,
+    link: `/${locale}/blog/${post.slug}`,
     order: i,
   }))
 
@@ -100,6 +100,7 @@ export default async function Home({ params }: Props) {
         title={t.hero.title}
         ctaText={t.hero.cta}
         microNote={t.hero.microNote}
+        locale={locale}
       />
       <Directions
         projects={projectItems}
@@ -109,10 +110,12 @@ export default async function Home({ params }: Props) {
         emptyText={t.directions.empty}
         prevAria={t.directions.prev}
         nextAria={t.directions.next}
+        locale={locale}
       />
       <Process
         title={t.process.title}
         subtitle={t.process.subtitle}
+        steps={t.process.steps}
       />
       {/* <CaseStudy /> */}
       <Testimonials
@@ -129,6 +132,7 @@ export default async function Home({ params }: Props) {
         subtitle={t.articles.subtitle}
         emptyText={t.articles.empty}
         readMoreText={t.articles.readMore}
+        readMoreLink={`/${locale}/blog`}
       />
       {/* <CTA /> */}
       <ContactSection locale={locale} />

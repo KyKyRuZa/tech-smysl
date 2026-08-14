@@ -18,10 +18,10 @@ export const translations = {
       title: 'Как мы работаем',
       subtitle: 'Прозрачный процесс от идеи до запуска',
       steps: [
-        { title: 'Бриф и анализ', desc: 'Изучаем вашу задачу, рынок и конкурентов. Формируем ТЗ и оценку.' },
-        { title: 'Прототип и дизайн', desc: 'Создаём UX/UI, согласовываем сценарии и визуал.' },
-        { title: 'Разработка и тесты', desc: 'Пишем код, настраиваем инфраструктуру, проводим QA.' },
-        { title: 'Запуск и поддержка', desc: 'Выводим в прод, отслеживаем метрики, дорабатываем.' },
+        { title: 'Анализ и аудит', desc: 'Изучаем бизнес, аудит существующих решений, определяем цели и KPI.' },
+        { title: 'Дизайн и прототипирование', desc: 'Создаём прототип, согласуем визуал и архитектуру продукта.' },
+        { title: 'Разработка', desc: 'Пишем код, тестируем, итерируем. Еженедельные демо и прозрачная коммуникация.' },
+        { title: 'Запуск и поддержка', desc: 'Деплой, мониторинг, оптимизация. Гарантируем аптайм и стабильность.' },
       ],
     },
     testimonials: {
@@ -34,7 +34,7 @@ export const translations = {
     articles: {
       title: 'Полезное',
       subtitle: 'Гайды и статьи по разработке',
-      readMore: 'Все статьи →',
+      readMore: 'Все статьи',
       empty: 'Пока нет статей',
     },
     contact: {
@@ -56,6 +56,19 @@ export const translations = {
       title: 'Блог',
       empty: 'Статей пока нет.',
     },
+    footer: {
+      brandName: 'Tech Smysl',
+      brandDesc: 'Разрабатываем IT-решения для бизнеса: 3D, AR, веб и мобильные продукты.',
+      navTitle: 'Навигация',
+      contactsTitle: 'Контакты',
+      copyright: 'Все права защищены.',
+      about: 'Об агентстве',
+      projects: 'Портфолио',
+      discuss: 'Обсудить проект',
+      phone: '+7 800 555 35 35',
+      email: 'digital@techsmysl.ru',
+      address: 'ул. Вишневского, 26А',
+    },
   },
   en: {
     hero: {
@@ -76,10 +89,10 @@ export const translations = {
       title: 'How we work',
       subtitle: 'Transparent process from idea to launch',
       steps: [
-        { title: 'Brief & analysis', desc: 'We study your task, market and competitors. Form TOR and estimate.' },
-        { title: 'Prototype & design', desc: 'Create UX/UI, agree scenarios and visuals.' },
-        { title: 'Development & QA', desc: 'Write code, set up infrastructure, run QA.' },
-        { title: 'Launch & support', desc: 'Go live, track metrics, iterate.' },
+        { title: 'Analysis and audit', desc: 'We study the business, audit existing solutions, define goals and KPIs.' },
+        { title: 'Design and prototyping', desc: 'We build a prototype, align visuals and product architecture.' },
+        { title: 'Development', desc: 'We write code, run tests, and iterate. Weekly demos and transparent communication.' },
+        { title: 'Launch and support', desc: 'Deployment, monitoring, optimization. We guarantee uptime and stability.' },
       ],
     },
     testimonials: {
@@ -92,7 +105,7 @@ export const translations = {
     articles: {
       title: 'Insights',
       subtitle: 'Guides and articles on development',
-      readMore: 'All articles →',
+      readMore: 'All articles',
       empty: 'No articles yet',
     },
     contact: {
@@ -113,6 +126,19 @@ export const translations = {
     blog: {
       title: 'Blog',
       empty: 'No articles yet.',
+    },
+    footer: {
+      brandName: 'Tech Smysl',
+      brandDesc: 'We build IT solutions for business: 3D, AR, web and mobile products.',
+      navTitle: 'Navigation',
+      contactsTitle: 'Contacts',
+      copyright: 'All rights reserved.',
+      about: 'About',
+      projects: 'Portfolio',
+      discuss: 'Discuss project',
+      phone: '+7 800 555 35 35',
+      email: 'digital@techsmysl.ru',
+      address: '26A Vishnevskogo St.',
     },
   },
 }

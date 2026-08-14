@@ -31,29 +31,35 @@ export default async function BlogPostsPage() {
             <table className={styles.adminTable}>
               <thead>
                 <tr>
-                  <th>Заголовок</th>
+                  <th>Заголовок (RU)</th>
+                  <th>Заголовок (EN)</th>
                   <th>Slug</th>
                   <th>Статус</th>
                   <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
-                {posts.map((post) => (
-                  <tr key={post.id}>
-                    <td className={styles.adminTableTitle}>{post.title}</td>
-                    <td>{post.slug}</td>
-                    <td>
-                      <span
-                        className={`${styles.adminBadge} ${post.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
-                      >
-                        {post.published ? 'Опубликована' : 'Черновик'}
-                      </span>
-                    </td>
-                    <td>
-                      <RowActions entity="blog-posts" id={post.id} redirectPath="/admin/blog-posts" />
-                    </td>
-                  </tr>
-                ))}
+                {posts.map((post) => {
+                  const ru = post.translations.find((t) => t.locale === 'ru')
+                  const en = post.translations.find((t) => t.locale === 'en')
+                  return (
+                    <tr key={post.id}>
+                      <td className={styles.adminTableTitle}>{ru?.title ?? '—'}</td>
+                      <td>{en?.title ?? '—'}</td>
+                      <td>{ru?.slug ?? post.slug ?? '—'}</td>
+                      <td>
+                        <span
+                          className={`${styles.adminBadge} ${post.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
+                        >
+                          {post.published ? 'Опубликована' : 'Черновик'}
+                        </span>
+                      </td>
+                      <td>
+                        <RowActions entity="blog-posts" id={post.id} redirectPath="/admin/blog-posts" />
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

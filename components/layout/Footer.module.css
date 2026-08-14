@@ -1,5 +1,6 @@
 .footer {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
+  background: var(--white);
   margin-top: auto;
 }
 
@@ -7,11 +8,111 @@
   max-width: 80rem;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-  text-align: center;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.brandName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.2;
+}
+
+.brandDesc {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--gray);
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+.navTitle,
+.contactsTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--gray-light);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.navLink {
+  font-size: 0.875rem;
+  color: var(--gray);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.navLink:hover {
+  color: var(--black);
+}
+
+.contactsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.contactLink {
+  font-size: 0.875rem;
+  color: var(--gray);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contactLink:hover {
+  color: var(--black);
+}
+
+.address {
+  font-size: 0.875rem;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+.bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.copyright {
+  font-size: 0.75rem;
+  color: var(--gray-light);
+}
+
+@media (max-width: 768px) {
+  .top {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
 }

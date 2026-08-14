@@ -5,7 +5,11 @@ import { decrypt } from '@/lib/auth/session'
 import LangSwitch from './LangSwitch'
 import styles from './Header.module.css'
 
-export default async function Header() {
+interface HeaderProps {
+  locale: string
+}
+
+export default async function Header({ locale }: HeaderProps) {
   const cookieStore = await cookies()
   const session = cookieStore.get('session')?.value
   const payload = decrypt(session)
@@ -14,18 +18,18 @@ export default async function Header() {
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <Link href="/" className={styles.logo}>
+        <Link href={`/${locale}`} className={styles.logo}>
           <Image src="/logo.svg" alt="Tech Smysl" width={187} height={42} priority />
         </Link>
 
         <nav className={styles.nav}>
-          <Link href="/about" className={styles.navLink}>
+          <Link href={`/${locale}/about`} className={styles.navLink}>
             Об агентстве
           </Link>
-          <Link href="/projects" className={styles.navLink}>
+          <Link href={`/${locale}/projects`} className={styles.navLink}>
             Портфолио
           </Link>
-          <Link href="/#discuss" className={styles.navLink}>
+          <Link href={`/${locale}/#discuss`} className={styles.navLink}>
             Обсудить проект
           </Link>
         </nav>

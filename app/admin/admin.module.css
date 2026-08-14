@@ -500,6 +500,25 @@
   margin-top: 4px;
 }
 
+.adminTranslationSection {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.adminSectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
 .adminBadge {
   display: inline-flex;
   align-items: center;

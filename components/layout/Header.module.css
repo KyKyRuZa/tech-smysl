@@ -62,11 +62,13 @@
 }
 
 .langActive {
+  background-color: var(--white);
   color: #b91c1c;
   font-weight: 600;
 }
 
 .langInactive {
+  background-color: var(--white);
   color: #9ca3af;
   text-decoration: none;
 }

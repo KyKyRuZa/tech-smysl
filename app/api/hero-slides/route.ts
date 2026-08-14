@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth/require-auth'
 import { heroSlideSchema } from '@/lib/validation/schemas'
 import { logger } from '@/lib/logger'
 import { validateBody } from '@/lib/auth/middleware'
+import { upsertHeroSlideTranslations } from '@/lib/api/translations'
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,14 +32,33 @@ export async function POST(req: NextRequest) {
     if (payload instanceof NextResponse) return payload
 
     const body = await req.json()
-    const validation = validateBody(heroSlideSchema, body)
+    const ru = (body as Record<string, unknown> & { translations?: { ru?: Record<string, unknown> } }).translations?.ru
+    const merged = {
+      ...body,
+      title: (body as Record<string, unknown>).title ?? ru?.title,
+      subtitle: (body as Record<string, unknown>).subtitle ?? ru?.subtitle,
+      ctaText: (body as Record<string, unknown>).ctaText ?? ru?.ctaText,
+      imageAlt: (body as Record<string, unknown>).imageAlt ?? ru?.imageAlt,
+    }
+    const validation = validateBody(heroSlideSchema, merged)
     if (!validation.success) {
       return validation.response
     }
 
+    const { translations, ...baseData } = merged as Record<string, unknown> & {
+      translations?: {
+        ru?: { title?: string; subtitle?: string; ctaText?: string; imageAlt?: string }
+        en?: { title?: string; subtitle?: string; ctaText?: string; imageAlt?: string }
+      }
+    }
+
     const created = await prisma.heroSlide.create({
-      data: validation.data,
+      data: baseData as never,
     })
+
+    if (translations && (translations.ru || translations.en)) {
+      await upsertHeroSlideTranslations(created.id, translations)
+    }
 
     logger.info('HeroSlide created', { heroSlideId: created.id })
     return NextResponse.json({ data: created }, { status: 201 })

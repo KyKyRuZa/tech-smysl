@@ -1,7 +1,7 @@
 .directions {
   background: url('/directions-bg.webp') center/100% 100% no-repeat;
   padding: 80px 48px 48px;
-  min-height: calc(100vh - 66px);
+  min-height: calc(100vh + 66px);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -20,7 +20,6 @@
 }
 
 .directionsCarouselWrap {
-  overflow: hidden;
 }
 
 .directionsHead {
@@ -50,9 +49,10 @@
   display: flex;
   gap: 18px;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  padding-bottom: 6px;
+  padding: 33px;
   scrollbar-width: none;
 }
 
@@ -66,8 +66,6 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  overflow: hidden;
-  scroll-snap-align: center;
   transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
   position: relative;
 }
@@ -90,6 +88,7 @@
   background: rgba(255, 255, 255, 0.06);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   overflow: hidden;
+  border-radius: 14px 14px 0 0;
 }
 
 .projectCardMedia img {
@@ -98,10 +97,6 @@
   object-fit: cover;
   display: block;
   transition: transform 0.4s;
-}
-
-.projectCard:hover .projectCardMedia img {
-  transform: scale(1.04);
 }
 
 .projectCardBody {

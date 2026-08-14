@@ -29,7 +29,7 @@ export default function RowActions({ entity, id, redirectPath }: RowActionsProps
       await dialog.alert({ title: 'Ошибка', message: 'Не удалось удалить' })
       return
     }
-    router.push(redirectPath)
+    await router.push(redirectPath)
     router.refresh()
   }, [dialog, entity, id, redirectPath, router])
 

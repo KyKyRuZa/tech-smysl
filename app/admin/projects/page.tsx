@@ -31,29 +31,35 @@ export default async function ProjectsPage() {
             <table className={styles.adminTable}>
               <thead>
                 <tr>
-                  <th>Название</th>
+                  <th>Название (RU)</th>
+                  <th>Название (EN)</th>
                   <th>Slug</th>
                   <th>Статус</th>
                   <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
-                {projects.map((project) => (
-                  <tr key={project.id}>
-                    <td className={styles.adminTableTitle}>{project.title}</td>
-                    <td>{project.slug}</td>
-                    <td>
-                      <span
-                        className={`${styles.adminBadge} ${project.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
-                      >
-                        {project.published ? 'Опубликован' : 'Черновик'}
-                      </span>
-                    </td>
-                    <td>
-                      <RowActions entity="projects" id={project.id} redirectPath="/admin/projects" />
-                    </td>
-                  </tr>
-                ))}
+                {projects.map((project) => {
+                  const ru = project.translations.find((t) => t.locale === 'ru')
+                  const en = project.translations.find((t) => t.locale === 'en')
+                  return (
+                    <tr key={project.id}>
+                      <td className={styles.adminTableTitle}>{ru?.title ?? '—'}</td>
+                      <td>{en?.title ?? '—'}</td>
+                      <td>{ru?.slug ?? project.slug ?? '—'}</td>
+                      <td>
+                        <span
+                          className={`${styles.adminBadge} ${project.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
+                        >
+                          {project.published ? 'Опубликован' : 'Черновик'}
+                        </span>
+                      </td>
+                      <td>
+                        <RowActions entity="projects" id={project.id} redirectPath="/admin/projects" />
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

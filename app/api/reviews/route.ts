@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth/require-auth'
 import { reviewSchema } from '@/lib/validation/schemas'
 import { logger } from '@/lib/logger'
 import { validateBody } from '@/lib/auth/middleware'
+import { upsertReviewTranslations } from '@/lib/api/translations'
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,14 +32,33 @@ export async function POST(req: NextRequest) {
     if (payload instanceof NextResponse) return payload
 
     const body = await req.json()
-    const validation = validateBody(reviewSchema, body)
+    const ru = (body as Record<string, unknown> & { translations?: { ru?: Record<string, unknown> } }).translations?.ru
+    const merged = {
+      ...body,
+      headline: (body as Record<string, unknown>).headline ?? ru?.headline,
+      body: (body as Record<string, unknown>).body ?? ru?.body,
+      author: (body as Record<string, unknown>).author ?? ru?.author,
+      role: (body as Record<string, unknown>).role ?? ru?.role,
+    }
+    const validation = validateBody(reviewSchema, merged)
     if (!validation.success) {
       return validation.response
     }
 
+    const { translations, ...baseData } = merged as Record<string, unknown> & {
+      translations?: {
+        ru?: { headline: string; body: string; author?: string; role?: string }
+        en?: { headline: string; body: string; author?: string; role?: string }
+      }
+    }
+
     const created = await prisma.review.create({
-      data: validation.data,
+      data: baseData as never,
     })
+
+    if (translations && (translations.ru || translations.en)) {
+      await upsertReviewTranslations(created.id, translations)
+    }
 
     logger.info('Review created', { reviewId: created.id })
     return NextResponse.json({ data: created }, { status: 201 })

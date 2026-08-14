@@ -12,7 +12,18 @@ export interface ProcessStep {
   order: number;
 }
 
-const STEPS: ProcessStep[] = [
+interface RawProcessStep {
+  title: string;
+  desc: string;
+}
+
+interface ProcessProps {
+  steps?: RawProcessStep[];
+  title?: string;
+  subtitle?: string;
+}
+
+const DEFAULT_STEPS: ProcessStep[] = [
   {
     id: 'discovery',
     number: '01',
@@ -43,21 +54,20 @@ const STEPS: ProcessStep[] = [
   },
 ];
 
-interface ProcessProps {
-  steps?: ProcessStep[];
-  title?: string;
-  subtitle?: string;
-}
-
 const Process: React.FC<ProcessProps> = ({ steps: externalSteps, title, subtitle }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
 
   const steps = useMemo(() => {
-    if (externalSteps) return externalSteps;
-    return STEPS.map((s, i) => ({
-      ...s,
-      order: i,
-    }));
+    if (externalSteps) {
+      return externalSteps.map((s, i) => ({
+        id: `step-${i}`,
+        number: String(i + 1).padStart(2, '0'),
+        title: s.title,
+        desc: s.desc,
+        order: i,
+      }));
+    }
+    return DEFAULT_STEPS;
   }, [externalSteps]);
 
   return (

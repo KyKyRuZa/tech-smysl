@@ -32,28 +32,34 @@ export default async function HeroSlidesPage() {
               <thead>
                 <tr>
                   <th>Alt</th>
-                  <th>Заголовок</th>
+                  <th>Заголовок (RU)</th>
+                  <th>Заголовок (EN)</th>
                   <th>Статус</th>
                   <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
-                {slides.map((slide) => (
-                  <tr key={slide.id}>
-                    <td className={styles.adminTableTitle}>{slide.imageAlt ?? '—'}</td>
-                    <td>{slide.title ?? '—'}</td>
-                    <td>
-                      <span
-                        className={`${styles.adminBadge} ${slide.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
-                      >
-                        {slide.published ? 'Опубликован' : 'Черновик'}
-                      </span>
-                    </td>
-                    <td>
-                      <RowActions entity="hero-slides" id={slide.id} redirectPath="/admin/hero-slides" />
-                    </td>
-                  </tr>
-                ))}
+                {slides.map((slide) => {
+                  const ru = slide.translations.find((t) => t.locale === 'ru')
+                  const en = slide.translations.find((t) => t.locale === 'en')
+                  return (
+                    <tr key={slide.id}>
+                      <td className={styles.adminTableTitle}>{slide.imageAlt ?? '—'}</td>
+                      <td>{ru?.title ?? '—'}</td>
+                      <td>{en?.title ?? '—'}</td>
+                      <td>
+                        <span
+                          className={`${styles.adminBadge} ${slide.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
+                        >
+                          {slide.published ? 'Опубликован' : 'Черновик'}
+                        </span>
+                      </td>
+                      <td>
+                        <RowActions entity="hero-slides" id={slide.id} redirectPath="/admin/hero-slides" />
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

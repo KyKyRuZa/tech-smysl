@@ -46,7 +46,7 @@ export default async function AdminApplicationsPage() {
         {applications.length === 0 ? (
           <div className={styles.adminEmpty}>
             <p>Заявок пока нет.</p>
-            <Link href="/#discuss" className={`${styles.adminBtn} ${styles.adminBtnSecondary}`}>
+             <Link href="/ru/#discuss" className={`${styles.adminBtn} ${styles.adminBtnSecondary}`}>
               Открыть форму на сайте
             </Link>
           </div>

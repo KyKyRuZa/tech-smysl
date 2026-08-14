@@ -32,6 +32,21 @@
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
+  transition: border-color 0.2s;
+}
+
+.cardLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  border-color: #b91c1c;
+}
+
+.cardLink:hover .cardTitle {
+  color: #b91c1c;
 }
 
 .cardImg {

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useInView } from '@/hooks/useInView';
 import { ArticleCard } from './ArticleCard';
 import BlockAddButton from '@/components/admin/BlockAddButton';
@@ -56,6 +57,7 @@ interface ArticlesProps {
   subtitle?: string;
   emptyText?: string;
   readMoreText?: string;
+  readMoreLink?: string;
 }
 
 const Articles: React.FC<ArticlesProps> = ({
@@ -69,6 +71,7 @@ const Articles: React.FC<ArticlesProps> = ({
   subtitle,
   emptyText,
   readMoreText,
+  readMoreLink,
 }) => {
   const { ref: headRef, isInView: headVisible } = useInView({ threshold: 0.1 });
   const items = externalItems !== undefined ? externalItems : ITEMS;
@@ -80,17 +83,26 @@ const Articles: React.FC<ArticlesProps> = ({
     >
       <div className={styles.articlesInner}>
         <div className={styles.articlesHead} ref={headRef}>
-          <h2
-            className={`${styles.articlesTitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
-          >
-            {title ?? 'Полезное'}
-          </h2>
-          <p
-            className={`${styles.articlesSubtitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
-            style={{ transitionDelay: '0.1s' }}
-          >
-            {subtitle ?? 'Гайды и статьи по разработке'}
-          </p>
+          <div className={styles.headText}>
+            <h2
+              className={`${styles.articlesTitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
+            >
+              {title ?? 'Полезное'}
+            </h2>
+            <p
+              className={`${styles.articlesSubtitle} ${styles.animateIn} ${headVisible ? styles.visible : ''}`}
+              style={{ transitionDelay: '0.1s' }}
+            >
+              {subtitle ?? 'Гайды и статьи по разработке'}
+            </p>
+          </div>
+          {readMoreLink && readMoreText && (
+            <div className={styles.readMore}>
+              <Link href={readMoreLink} className={styles.readMoreLink}>
+                {readMoreText}
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className={styles.articlesGrid}>

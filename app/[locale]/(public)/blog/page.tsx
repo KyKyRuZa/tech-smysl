@@ -1,6 +1,7 @@
 import styles from './page.module.css'
 import { getLocalizedBlogPosts } from '@/lib/i18n/queries'
 import Image from 'next/image'
+import Link from 'next/link'
 import { getLocaleFromPath, isValidLocale } from '@/lib/i18n/get-locale'
 import { getTranslations } from '@/lib/i18n/translations'
 import { notFound } from 'next/navigation'
@@ -47,18 +48,20 @@ export default async function Blog({ params }: Props) {
         <ul className={styles.grid}>
           {posts.map((post) => (
             <li key={post.id} className={styles.card}>
-              {post.imageUrl && (
-                <Image
-                  src={post.imageUrl}
-                  alt={post.title}
-                  className={styles.cardImg}
-                  width={800}
-                  height={600}
-                  loading="lazy"
-                />
-              )}
-              <h2 className={styles.cardTitle}>{post.title}</h2>
-              {post.excerpt && <p className={styles.cardText}>{post.excerpt}</p>}
+              <Link href={`/${locale}/blog/${post.slug}`} className={styles.cardLink}>
+                {post.imageUrl && (
+                  <Image
+                    src={post.imageUrl}
+                    alt={post.title}
+                    className={styles.cardImg}
+                    width={800}
+                    height={600}
+                    loading="lazy"
+                  />
+                )}
+                <h2 className={styles.cardTitle}>{post.title}</h2>
+                {post.excerpt && <p className={styles.cardText}>{post.excerpt}</p>}
+              </Link>
             </li>
           ))}
         </ul>

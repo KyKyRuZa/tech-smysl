@@ -1,17 +1,35 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
-import AdminForm, { type FieldDef } from '@/components/admin/AdminForm'
+import AdminForm, { type FieldDef, type TranslationSection } from '@/components/admin/AdminForm'
 import styles from '../../admin.module.css'
 
-const fields: FieldDef[] = [
+const baseFields: FieldDef[] = [
   { name: 'imageUrl', label: 'Изображение', type: 'file', required: true },
   { name: 'imageAlt', label: 'Alt изображения', type: 'text' },
-  { name: 'title', label: 'Заголовок', type: 'text' },
-  { name: 'subtitle', label: 'Подзаголовок', type: 'text' },
-  { name: 'ctaText', label: 'Текст кнопки', type: 'text' },
-  { name: 'ctaLink', label: 'Ссылка кнопки', type: 'text' },
   { name: 'order', label: 'Порядок', type: 'number' },
   { name: 'published', label: 'Опубликовано', type: 'checkbox' },
+  { name: 'ctaLink', label: 'Ссылка кнопки', type: 'text' },
+]
+
+const translationSections: TranslationSection[] = [
+  {
+    locale: 'ru',
+    label: 'RU',
+    fields: [
+      { name: 'title', label: 'Заголовок', type: 'text', required: true },
+      { name: 'subtitle', label: 'Подзаголовок', type: 'text' },
+      { name: 'ctaText', label: 'Текст кнопки', type: 'text' },
+    ],
+  },
+  {
+    locale: 'en',
+    label: 'EN',
+    fields: [
+      { name: 'title', label: 'Заголовок', type: 'text', required: true },
+      { name: 'subtitle', label: 'Подзаголовок', type: 'text' },
+      { name: 'ctaText', label: 'Текст кнопки', type: 'text' },
+    ],
+  },
 ]
 
 export default async function NewHeroSlidePage() {
@@ -24,7 +42,12 @@ export default async function NewHeroSlidePage() {
         <h1>Новый слайд</h1>
       </div>
       <div className={styles.adminCard}>
-        <AdminForm entity="hero-slides" fields={fields} redirectPath="/admin/hero-slides" />
+        <AdminForm
+          entity="hero-slides"
+          fields={baseFields}
+          translationSections={translationSections}
+          redirectPath="/admin/hero-slides"
+        />
       </div>
     </div>
   )

@@ -31,29 +31,35 @@ export default async function ReviewsPage() {
             <table className={styles.adminTable}>
               <thead>
                 <tr>
-                  <th>Заголовок</th>
+                  <th>Заголовок (RU)</th>
+                  <th>Заголовок (EN)</th>
                   <th>Автор</th>
                   <th>Статус</th>
                   <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
-                {reviews.map((review) => (
-                  <tr key={review.id}>
-                    <td className={styles.adminTableTitle}>{review.headline}</td>
-                    <td>{review.author ?? '—'}</td>
-                    <td>
-                      <span
-                        className={`${styles.adminBadge} ${review.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
-                      >
-                        {review.published ? 'Опубликован' : 'Черновик'}
-                      </span>
-                    </td>
-                    <td>
-                      <RowActions entity="reviews" id={review.id} redirectPath="/admin/reviews" />
-                    </td>
-                  </tr>
-                ))}
+                {reviews.map((review) => {
+                  const ru = review.translations.find((t) => t.locale === 'ru')
+                  const en = review.translations.find((t) => t.locale === 'en')
+                  return (
+                    <tr key={review.id}>
+                      <td className={styles.adminTableTitle}>{ru?.headline ?? '—'}</td>
+                      <td>{en?.headline ?? '—'}</td>
+                      <td>{review.author ?? '—'}</td>
+                      <td>
+                        <span
+                          className={`${styles.adminBadge} ${review.published ? styles.adminBadgePublished : styles.adminBadgeDraft}`}
+                        >
+                          {review.published ? 'Опубликован' : 'Черновик'}
+                        </span>
+                      </td>
+                      <td>
+                        <RowActions entity="reviews" id={review.id} redirectPath="/admin/reviews" />
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

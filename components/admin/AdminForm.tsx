@@ -15,11 +15,19 @@ export interface FieldDef {
   placeholder?: string
 }
 
+export interface TranslationSection {
+  locale: string
+  label: string
+  fields: FieldDef[]
+}
+
 interface AdminFormProps {
   entity: 'projects' | 'blog-posts' | 'reviews' | 'hero-slides'
   fields: FieldDef[]
   initialData?: Record<string, unknown> | null
   redirectPath: string
+  translationSections?: TranslationSection[]
+  initialTranslations?: Record<string, Record<string, unknown>>
 }
 
 async function uploadFile(file: File, folder: string): Promise<string> {
@@ -35,7 +43,14 @@ async function uploadFile(file: File, folder: string): Promise<string> {
   return data.url as string
 }
 
-export default function AdminForm({ entity, fields, initialData, redirectPath }: AdminFormProps) {
+export default function AdminForm({
+  entity,
+  fields,
+  initialData,
+  redirectPath,
+  translationSections,
+  initialTranslations,
+}: AdminFormProps) {
   const router = useRouter()
   const isEdit = Boolean(initialData?.id)
   const [error, setError] = useState('')
@@ -65,6 +80,7 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
         const el = elements[i] as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
         if (!el.name || el.type === 'file') continue
         if (jsonData[el.name] !== undefined) continue
+        if (el.name.startsWith('translations[')) continue
 
         if (el.type === 'checkbox') {
           jsonData[el.name] = (el as HTMLInputElement).checked
@@ -78,6 +94,34 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
         } else {
           jsonData[el.name] = el.value
         }
+      }
+
+      const translations: Record<string, Record<string, unknown>> = {}
+      if (translationSections) {
+        for (const section of translationSections) {
+          const sectionData: Record<string, unknown> = {}
+          for (const field of section.fields) {
+            const input = form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+              `[name="translations[${section.locale}][${field.name}]"]`
+            )
+            if (input) {
+              if (input.type === 'checkbox') {
+                sectionData[field.name] = (input as HTMLInputElement).checked
+              } else if (input.type === 'number') {
+                sectionData[field.name] = input.value ? Number(input.value) : undefined
+              } else if ((input as HTMLInputElement).dataset?.array === 'true') {
+                sectionData[field.name] = input.value
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+              } else {
+                sectionData[field.name] = input.value
+              }
+            }
+          }
+          translations[section.locale] = sectionData
+        }
+        jsonData.translations = translations
       }
 
       const url = isEdit ? `/api/${entity}/${initialData!.id}` : `/api/${entity}`
@@ -95,7 +139,7 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
         return
       }
 
-      router.push(redirectPath)
+      await router.push(redirectPath)
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Что-то пошло не так')
@@ -103,106 +147,121 @@ export default function AdminForm({ entity, fields, initialData, redirectPath }:
     }
   }
 
+  function renderField(field: FieldDef, value: unknown, namePrefix?: string) {
+    const name = namePrefix ? `${namePrefix}[${field.name}]` : field.name
+    const safeId = name.replace(/[^a-zA-Z0-9_-]/g, '_')
+    const currentUrl = typeof value === 'string' ? value : ''
+
+    if (field.type === 'file') {
+      return (
+        <div className={styles.adminFormGroup} key={field.name}>
+          <label htmlFor={safeId}>{field.label}</label>
+          {currentUrl && (
+            <img
+              src={currentUrl}
+              alt={field.label}
+              style={{ maxWidth: 200, maxHeight: 100, borderRadius: 8, marginBottom: 8 }}
+            />
+          )}
+          <input
+            id={safeId}
+            name={name}
+            type="file"
+            accept="image/*"
+            data-current-url={currentUrl}
+          />
+        </div>
+      )
+    }
+
+    if (field.type === 'textarea') {
+      return (
+        <div className={styles.adminFormGroup} key={field.name}>
+          <label htmlFor={safeId}>{field.label}</label>
+          <textarea
+            id={safeId}
+            name={name}
+            required={field.required}
+            defaultValue={typeof value === 'string' ? value : ''}
+            placeholder={field.placeholder}
+          />
+        </div>
+      )
+    }
+
+    if (field.type === 'checkbox') {
+      return (
+        <div className={`${styles.adminFormGroup} ${styles.adminFormGroupCheckbox}`} key={field.name}>
+          <label htmlFor={safeId}>{field.label}</label>
+          <input
+            id={safeId}
+            name={name}
+            type="checkbox"
+            defaultChecked={Boolean(value)}
+          />
+        </div>
+      )
+    }
+
+    if (field.type === 'number') {
+      return (
+        <div className={styles.adminFormGroup} key={field.name}>
+          <label htmlFor={safeId}>{field.label}</label>
+          <input
+            id={safeId}
+            name={name}
+            type="number"
+            required={field.required}
+            defaultValue={typeof value === 'number' ? value : 0}
+          />
+        </div>
+      )
+    }
+
+    if (field.type === 'tags') {
+      const arr = Array.isArray(value) ? (value as string[]).join(', ') : ''
+      return (
+        <div className={styles.adminFormGroup} key={field.name}>
+          <label htmlFor={safeId}>{field.label}</label>
+          <input
+            id={safeId}
+            name={name}
+            type="text"
+            data-array="true"
+            defaultValue={arr}
+            placeholder={field.placeholder}
+          />
+        </div>
+      )
+    }
+
+    return (
+      <div className={styles.adminFormGroup} key={field.name}>
+        <label htmlFor={safeId}>{field.label}</label>
+        <input
+          id={safeId}
+          name={name}
+          type="text"
+          required={field.required}
+          defaultValue={typeof value === 'string' ? value : ''}
+          placeholder={field.placeholder}
+        />
+      </div>
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit} className={styles.adminForm}>
-      {fields.map((field) => {
-        const value = initialData?.[field.name]
-        const currentUrl = typeof value === 'string' ? value : ''
+      {fields.map((field) => renderField(field, initialData?.[field.name]))}
 
-        if (field.type === 'file') {
-          return (
-            <div className={styles.adminFormGroup} key={field.name}>
-              <label htmlFor={field.name}>{field.label}</label>
-              {currentUrl && (
-                <img
-                  src={currentUrl}
-                  alt={field.label}
-                  style={{ maxWidth: 200, maxHeight: 100, borderRadius: 8, marginBottom: 8 }}
-                />
-              )}
-              <input
-                id={field.name}
-                name={field.name}
-                type="file"
-                accept="image/*"
-                data-current-url={currentUrl}
-              />
-            </div>
-          )
-        }
-
-        if (field.type === 'textarea') {
-          return (
-            <div className={styles.adminFormGroup} key={field.name}>
-              <label htmlFor={field.name}>{field.label}</label>
-              <textarea
-                id={field.name}
-                name={field.name}
-                required={field.required}
-                defaultValue={typeof value === 'string' ? value : ''}
-                placeholder={field.placeholder}
-              />
-            </div>
-          )
-        }
-
-        if (field.type === 'checkbox') {
-          return (
-            <div className={`${styles.adminFormGroup} ${styles.adminFormGroupCheckbox}`} key={field.name}>
-              <label htmlFor={field.name}>{field.label}</label>
-              <input
-                id={field.name}
-                name={field.name}
-                type="checkbox"
-                defaultChecked={Boolean(value)}
-              />
-            </div>
-          )
-        }
-
-        if (field.type === 'number') {
-          return (
-            <div className={styles.adminFormGroup} key={field.name}>
-              <label htmlFor={field.name}>{field.label}</label>
-              <input
-                id={field.name}
-                name={field.name}
-                type="number"
-                required={field.required}
-                defaultValue={typeof value === 'number' ? value : 0}
-              />
-            </div>
-          )
-        }
-
-        if (field.type === 'tags') {
-          const arr = Array.isArray(value) ? (value as string[]).join(', ') : ''
-          return (
-            <div className={styles.adminFormGroup} key={field.name}>
-              <label htmlFor={field.name}>{field.label}</label>
-              <input
-                id={field.name}
-                name={field.name}
-                type="text"
-                data-array="true"
-                defaultValue={arr}
-                placeholder={field.placeholder}
-              />
-            </div>
-          )
-        }
-
+      {translationSections?.map((section) => {
+        const sectionInitial = initialTranslations?.[section.locale]
         return (
-          <div className={styles.adminFormGroup} key={field.name}>
-            <label htmlFor={field.name}>{field.label}</label>
-            <input
-              id={field.name}
-              name={field.name}
-              type="text"
-              required={field.required}
-              defaultValue={typeof value === 'string' ? value : ''}
-              placeholder={field.placeholder}
-            />
+          <div key={section.locale} className={styles.adminTranslationSection}>
+            <h3 className={styles.adminSectionTitle}>{section.label}</h3>
+            {section.fields.map((field) =>
+              renderField(field, sectionInitial?.[field.name], `translations[${section.locale}]`)
+            )}
           </div>
         )
       })}

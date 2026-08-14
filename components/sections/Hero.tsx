@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import styles from './Hero.module.css';
 
 const BlockControls = dynamic(() => import('@/components/admin/BlockControls'), { ssr: false })
@@ -59,6 +60,7 @@ interface HeroProps {
   title?: string;
   ctaText?: string;
   microNote?: string;
+  locale?: string
 }
 
 export default function Hero({
@@ -75,6 +77,7 @@ export default function Hero({
   title,
   ctaText,
   microNote,
+  locale = 'ru',
 }: HeroProps) {
   const HERO_SLIDES: HeroSlideData[] = slides && slides.length > 0 ? slides : DEFAULT_HERO_SLIDES;
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -167,9 +170,9 @@ export default function Hero({
           <p className={styles.heroSub}>{subtitleText}</p>
 
           <div className={styles.heroActions}>
-            <button type="button" className={styles.btnRed}>
+            <Link href={`/${locale}/#discuss`} className={styles.btnRed}>
               {ctaText ?? 'Обсудить проект'}
-            </button>
+            </Link>
             <span className={styles.microNote}>{microNote ?? 'Ответ в течение 15 минут · Можно в Telegram'}</span>
           </div>
         </div>

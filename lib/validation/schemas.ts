@@ -41,7 +41,7 @@ export const projectSchema = z.object({
   tags: z.array(z.string()).optional(),
   published: z.boolean().optional(),
   order: z.number().int().optional(),
-})
+}).passthrough()
 
 export const projectUpdateSchema = projectSchema.partial()
 
@@ -54,7 +54,7 @@ export const heroSlideSchema = z.object({
   ctaLink: safeUrlSchema,
   order: z.number().int().optional(),
   published: z.boolean().optional(),
-})
+}).passthrough()
 
 export const heroSlideUpdateSchema = heroSlideSchema.partial()
 
@@ -67,7 +67,7 @@ export const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5).optional(),
   order: z.number().int().optional(),
   published: z.boolean().optional(),
-})
+}).passthrough()
 
 export const reviewUpdateSchema = reviewSchema.partial()
 
@@ -80,7 +80,7 @@ export const blogPostSchema = z.object({
   authorId: z.string().optional(),
   published: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
-})
+}).passthrough()
 
 export const blogPostUpdateSchema = blogPostSchema.partial()
 
