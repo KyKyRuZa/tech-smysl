@@ -1,6 +1,7 @@
 import styles from './blog-post.module.css'
 import { getLocalizedBlogPostBySlug } from '@/lib/i18n/queries'
 import { isValidLocale } from '@/lib/i18n/get-locale'
+import { getTranslations } from '@/lib/i18n/translations'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -40,6 +41,8 @@ export default async function BlogPostDetail({ params }: Props) {
     notFound()
   }
 
+  const t = getTranslations(locale)
+
   const tags = post.tags?.filter(Boolean) ?? []
   const date = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'en-US', {
@@ -52,10 +55,25 @@ export default async function BlogPostDetail({ params }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.inner}>
-        <Link href={`/${locale}/blog`} className={styles.backLink}>
-          <span>←</span>
-          <span>{locale === 'ru' ? 'Назад к блогу' : 'Back to blog'}</span>
-        </Link>
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <ol className={styles.breadcrumbList}>
+            <li className={styles.breadcrumbItem}>
+              <Link href={`/${locale}`} className={styles.breadcrumbLink}>
+                {t.blog.home}
+              </Link>
+              <span className={styles.breadcrumbSeparator}>/</span>
+            </li>
+            <li className={styles.breadcrumbItem}>
+              <Link href={`/${locale}/blog`} className={styles.breadcrumbLink}>
+                {t.breadcrumb.blogList}
+              </Link>
+              <span className={styles.breadcrumbSeparator}>/</span>
+            </li>
+            <li className={styles.breadcrumbItem}>
+              <span className={styles.breadcrumbCurrent}>{post.title}</span>
+            </li>
+          </ol>
+        </nav>
 
         <header className={styles.header}>
           <h1 className={styles.title}>{post.title}</h1>

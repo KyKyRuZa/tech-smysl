@@ -80,9 +80,16 @@ function isAssetPath(pathname: string): boolean {
   return (
     pathname.startsWith('/_next') ||
     pathname.includes('.') ||
-    pathname.startsWith('/api') ||
-    pathname.startsWith('/admin')
+    pathname.startsWith('/api')
   )
+}
+
+function stripLocale(pathname: string): string {
+  const segments = pathname.split('/')
+  if (segments[1] && isValidLocale(segments[1])) {
+    segments.splice(1, 1)
+  }
+  return segments.join('/') || '/'
 }
 
 export async function proxy(req: NextRequest) {
@@ -129,9 +136,44 @@ export async function proxy(req: NextRequest) {
     return res
   }
 
+  const stripped = stripLocale(pathname)
+  const isProtectedRoute = protectedRoutes.some(
+    (route) => stripped === route || stripped.startsWith(`${route}/`)
+  )
+  const isPublicRoute = publicRoutes.some((route) => stripped === route)
+
+  const session = req.cookies.get('session')?.value
+  const payload = decrypt(session)
+
+  if (isProtectedRoute && !payload?.userId) {
+    logger.warn('Proxy redirect: unauthorized access to protected route', { pathname })
+    return NextResponse.redirect(new URL('/login', req.nextUrl))
+  }
+
+  if (isPublicRoute && payload?.userId) {
+    logger.info('Proxy redirect: authenticated user on public route', {
+      pathname,
+      userId: payload.userId,
+    })
+    return NextResponse.redirect(new URL('/admin', req.nextUrl))
+  }
+
   const currentLocale = getLocaleFromPath(pathname)
 
   if (!currentLocale) {
+    // Locale-less special routes (admin/login) are served as-is; content
+    // pages get a locale-prefixed redirect so the App Router can resolve them.
+    if (isProtectedRoute || isPublicRoute) {
+      const res = NextResponse.next()
+      applyDocHeaders(res, nonce, corsHeaders)
+      res.cookies.set('NEXT_LOCALE', defaultLocale, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: 'lax',
+      })
+      return res
+    }
+
     const cookieLocale = req.cookies.get('NEXT_LOCALE')?.value
     const target = cookieLocale && isValidLocale(cookieLocale) ? cookieLocale : defaultLocale
     const url = req.nextUrl.clone()
@@ -145,47 +187,31 @@ export async function proxy(req: NextRequest) {
     return res
   }
 
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-  const isPublicRoute = publicRoutes.some(route => pathname === route)
-
-  const session = req.cookies.get('session')?.value
-  const payload = decrypt(session)
-
-  if (isProtectedRoute && !payload?.userId) {
-    logger.warn('Proxy redirect: unauthorized access to protected route', { pathname })
-    return NextResponse.redirect(new URL('/login', req.nextUrl))
-  }
-
-  if (isPublicRoute && payload?.userId) {
-    logger.info('Proxy redirect: authenticated user on public route', { pathname, userId: payload.userId })
-    return NextResponse.redirect(new URL('/admin', req.nextUrl))
-  }
-
   const res = NextResponse.next()
-
-  if (!pathname.startsWith('/api/')) {
-    const csp = buildCsp(nonce)
-
-    const requestHeaders = new Headers(req.headers)
-    requestHeaders.set('x-nonce', nonce)
-    requestHeaders.set('Content-Security-Policy', csp)
-    res.headers.set('Content-Security-Policy', csp)
-
-    if (process.env.NODE_ENV === 'production') {
-      res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
-    }
-  }
-
+  applyDocHeaders(res, nonce, corsHeaders)
   res.cookies.set('NEXT_LOCALE', currentLocale, {
     path: '/',
     maxAge: 60 * 60 * 24 * 365,
     sameSite: 'lax',
   })
+  return res
+}
+
+function applyDocHeaders(
+  res: NextResponse,
+  nonce: string,
+  corsHeaders: Record<string, string>
+) {
+  const csp = buildCsp(nonce)
+  res.headers.set('Content-Security-Policy', csp)
+
+  if (process.env.NODE_ENV === 'production') {
+    res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+  }
 
   for (const [key, value] of Object.entries(corsHeaders)) {
     res.headers.set(key, value)
   }
-  return res
 }
 
 function applyCommonHeaders(req: NextRequest, res: NextResponse) {

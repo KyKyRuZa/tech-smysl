@@ -31,7 +31,7 @@ describe('Security: CSP and HSTS (proxy)', () => {
 
   it('sets a nonce-based CSP with no unsafe-inline/unsafe-eval on documents', async () => {
     mockDecrypt.mockReturnValue({ userId: '1', email: 'a@b.c', role: 'ADMIN' })
-    const res = await proxy(new NextRequest('http://localhost/'))
+    const res = await proxy(new NextRequest('http://localhost/ru'))
     const csp = res.headers.get('content-security-policy')
     expect(csp).toBeTruthy()
     const src = scriptSrc(csp)
@@ -59,7 +59,7 @@ describe('Security: CSP and HSTS (proxy)', () => {
   it('sets HSTS in production', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     mockDecrypt.mockReturnValue({ userId: '1', email: 'a@b.c', role: 'ADMIN' })
-    const res = await proxy(new NextRequest('http://localhost/'))
+    const res = await proxy(new NextRequest('http://localhost/ru'))
     expect(res.headers.get('strict-transport-security')).toBe(
       'max-age=63072000; includeSubDomains; preload'
     )

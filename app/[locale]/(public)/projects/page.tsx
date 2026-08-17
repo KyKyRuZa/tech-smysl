@@ -41,6 +41,19 @@ export default async function Projects({ params }: Props) {
 
   return (
     <div className={styles.container}>
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <ol className={styles.breadcrumbList}>
+          <li className={styles.breadcrumbItem}>
+            <Link href={`/${locale}`} className={styles.breadcrumbLink}>
+              {t.projects.home}
+            </Link>
+            <span className={styles.breadcrumbSeparator}>/</span>
+          </li>
+          <li className={styles.breadcrumbItem}>
+            <span className={styles.breadcrumbCurrent}>{t.projects.title}</span>
+          </li>
+        </ol>
+      </nav>
       <h1 className={styles.title}>{t.projects.title}</h1>
       {projects.length === 0 ? (
         <p className={styles.placeholder}>{t.projects.empty}</p>

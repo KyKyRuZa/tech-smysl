@@ -26,6 +26,49 @@
   color: var(--white);
 }
 
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.breadcrumbList {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.breadcrumbLink {
+  color: var(--gray-light);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumbLink:hover {
+  color: var(--white);
+}
+
+.breadcrumbSeparator {
+  color: var(--border-dark);
+  user-select: none;
+}
+
+.breadcrumbCurrent {
+  color: var(--white);
+  font-weight: 500;
+}
+
 .header {
   margin-bottom: 3rem;
 }

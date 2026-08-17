@@ -34,7 +34,8 @@ export default function LangSwitch() {
   }, [pathname])
 
   const switchTo = (target: string) => {
-    if (target === currentLocale) return
+    const current = getLocaleFromPath(pathname) ?? currentLocale
+    if (target === current) return
     setLocaleCookie(target)
     const segments = pathname.split('/')
     segments[1] = target

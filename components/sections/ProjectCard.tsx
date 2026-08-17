@@ -24,6 +24,7 @@ interface ProjectCardProps {
   project: Project;
   index: number;
   editable?: boolean;
+  locale?: string;
   onEdit?: (project: Project, index: number) => void;
   onDelete?: (project: Project, index: number) => void;
   onToggle?: (project: Project, index: number) => void;
@@ -33,6 +34,7 @@ function ProjectCardInner({
   project,
   index,
   editable,
+  locale = 'ru',
   onEdit,
   onDelete,
   onToggle,
@@ -46,7 +48,7 @@ function ProjectCardInner({
       style={editable ? { position: 'relative', opacity: editable && !project.published ? 0.55 : 1 } : undefined}
     >
       <Link
-        href={`/projects/${project.slug || project.id}`}
+        href={`/${locale}/projects/${project.slug || project.id}`}
         className={styles.projectCardLink}
       >
         <div className={styles.projectCardMedia}>

@@ -19,6 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: 'Тех Смысл — IT-разработка, 3D-визуализация и AR',
   description: 'IT-компания полного цикла: разработка сайтов, мобильных приложений, 3D-визуализация и AR-решения. +30 проектов в год, 99,9% аптайм.',
   keywords: 'разработка сайтов, веб-разработка, мобильные приложения, Flutter, React, 3D-визуализация, AR, дополненная реальность, AI решения, облачная инфраструктура, AWS, IT аутсорсинг, цифровая трансформация',
@@ -50,7 +51,7 @@ export default async function RootLayout({
   const lang = isValidLocale(cookieLocale ?? '') ? cookieLocale : 'ru'
 
   return (
-    <html lang={lang} className={`${unbounded.variable} ${jetbrainsMono.variable} antialiased`}>
+    <html lang={lang} data-scroll-behavior="smooth" className={`${unbounded.variable} ${jetbrainsMono.variable} antialiased`}>
       <body className="min-h-screen flex flex-col">
         {children}
       </body>

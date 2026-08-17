@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { isValidLocale } from '@/lib/i18n/get-locale'
+import { getTranslations } from '@/lib/i18n/translations'
 import { Metadata } from 'next'
 
 type Props = {
@@ -45,6 +46,8 @@ export default async function ProjectDetail({ params }: Props) {
   const prevProject = currentIndex > 0 ? allProjects[currentIndex - 1] : null
   const nextProject = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null
 
+  const t = getTranslations(locale)
+
   const benefits = project.benefits?.filter(Boolean) ?? []
   const tags = project.tags?.filter(Boolean) ?? []
   const useCases = project.useCases?.trim() ?? ''
@@ -52,10 +55,25 @@ export default async function ProjectDetail({ params }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.inner}>
-        <Link href={`/${locale}/projects`} className={styles.backLink}>
-          <span>←</span>
-          <span>Назад к проектам</span>
-        </Link>
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <ol className={styles.breadcrumbList}>
+            <li className={styles.breadcrumbItem}>
+              <Link href={`/${locale}`} className={styles.breadcrumbLink}>
+                {t.projects.home}
+              </Link>
+              <span className={styles.breadcrumbSeparator}>/</span>
+            </li>
+            <li className={styles.breadcrumbItem}>
+              <Link href={`/${locale}/projects`} className={styles.breadcrumbLink}>
+                {t.breadcrumb.projectsList}
+              </Link>
+              <span className={styles.breadcrumbSeparator}>/</span>
+            </li>
+            <li className={styles.breadcrumbItem}>
+              <span className={styles.breadcrumbCurrent}>{project.title}</span>
+            </li>
+          </ol>
+        </nav>
 
         <header className={styles.header}>
           <h1 className={styles.title}>{project.title}</h1>

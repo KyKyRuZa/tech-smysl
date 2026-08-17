@@ -149,6 +149,7 @@ const Directions: React.FC<DirectionsProps> = ({
                   project={project}
                   index={i}
                   editable={editable}
+                  locale={locale}
                   onEdit={onEdit}
                   onDelete={onDelete}
                   onToggle={onToggle}

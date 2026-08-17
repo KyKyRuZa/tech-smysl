@@ -29,6 +29,10 @@ vi.mock('@/lib/logger', () => ({
   },
 }))
 
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+}))
+
 const createMockParams = (id: string) => Promise.resolve({ id })
 
 describe('GET /api/reviews/[id]', () => {

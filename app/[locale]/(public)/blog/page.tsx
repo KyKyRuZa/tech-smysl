@@ -41,6 +41,19 @@ export default async function Blog({ params }: Props) {
 
   return (
     <div className={styles.container}>
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <ol className={styles.breadcrumbList}>
+          <li className={styles.breadcrumbItem}>
+            <Link href={`/${locale}`} className={styles.breadcrumbLink}>
+              {t.blog.home}
+            </Link>
+            <span className={styles.breadcrumbSeparator}>/</span>
+          </li>
+          <li className={styles.breadcrumbItem}>
+            <span className={styles.breadcrumbCurrent}>{t.blog.title}</span>
+          </li>
+        </ol>
+      </nav>
       <h1 className={styles.title}>{t.blog.title}</h1>
       {posts.length === 0 ? (
         <p className={styles.placeholder}>{t.blog.empty}</p>

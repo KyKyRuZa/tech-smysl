@@ -50,11 +50,17 @@ export const translations = {
     },
     projects: {
       title: 'Проекты',
+      home: 'Главная',
       empty: 'Проектов пока нет.',
     },
     blog: {
       title: 'Блог',
+      home: 'Главная',
       empty: 'Статей пока нет.',
+    },
+    breadcrumb: {
+      projectsList: 'Все проекты',
+      blogList: 'Блог',
     },
     footer: {
       brandName: 'Tech Smysl',
@@ -121,11 +127,17 @@ export const translations = {
     },
     projects: {
       title: 'Projects',
+      home: 'Home',
       empty: 'No projects yet.',
     },
     blog: {
       title: 'Blog',
+      home: 'Home',
       empty: 'No articles yet.',
+    },
+    breadcrumb: {
+      projectsList: 'All projects',
+      blogList: 'Blog',
     },
     footer: {
       brandName: 'Tech Smysl',
