@@ -1,6 +1,7 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { getAdminReviews } from '@/lib/admin-queries'
+import Link from 'next/link'
 import RowActions from '@/components/admin/RowActions'
 import styles from '../admin.module.css'
 
@@ -14,17 +15,17 @@ export default async function ReviewsPage() {
     <div>
       <div className={styles.adminHeader}>
         <h1>Отзывы</h1>
-        <a href="/admin/reviews/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+        <Link href="/admin/reviews/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
           Новый отзыв
-        </a>
+        </Link>
       </div>
       <div className={styles.adminCard}>
         {reviews.length === 0 ? (
           <div className={styles.adminEmpty}>
             <p>Отзывов пока нет.</p>
-            <a href="/admin/reviews/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+            <Link href="/admin/reviews/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
               Создать первый отзыв
-            </a>
+            </Link>
           </div>
         ) : (
           <div className={styles.adminTableWrap}>

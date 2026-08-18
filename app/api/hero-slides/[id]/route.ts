@@ -5,6 +5,7 @@ import { upsertHeroSlideTranslations } from '@/lib/api/translations'
 import { validateBody } from '@/lib/auth/middleware'
 import { requireAuth } from '@/lib/auth/require-auth'
 import { NextRequest, NextResponse } from 'next/server'
+import type { Prisma } from '@prisma/client'
 
 export const GET = createGetHandler(
   (id) => prisma.heroSlide.findUnique({ where: { id } }),
@@ -48,7 +49,7 @@ export async function PUT(
 
     const updated = await prisma.heroSlide.update({
       where: { id },
-      data: baseData as never,
+      data: baseData as Prisma.HeroSlideUpdateInput,
     })
 
     if (translations && (translations.ru || translations.en)) {

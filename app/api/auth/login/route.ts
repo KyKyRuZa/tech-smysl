@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const { email, password } = validation.data
 
     const clientIp = getClientIp(req)
-    if (!rateLimit(loginRateLimitKey(clientIp, email), 10, 15 * 60 * 1000)) {
+    if (!(await rateLimit(loginRateLimitKey(clientIp, email), 10, 15 * 60 * 1000))) {
       logger.warn('Login rate limit exceeded', { clientIp, email })
       return NextResponse.json(
         { error: 'Too many login attempts. Please try again later.' },

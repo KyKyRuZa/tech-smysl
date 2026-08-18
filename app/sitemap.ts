@@ -2,6 +2,8 @@ import { MetadataRoute } from 'next'
 import { getSitemapProjects, getSitemapBlogPosts } from '@/lib/i18n/queries'
 import { locales } from '@/lib/i18n/get-locale'
 
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'
 

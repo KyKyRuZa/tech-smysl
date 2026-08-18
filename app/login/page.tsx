@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import styles from '@/app/admin/admin.module.css'
+import styles from '../admin/admin.module.css'
 
 export default function LoginPage() {
   const router = useRouter()

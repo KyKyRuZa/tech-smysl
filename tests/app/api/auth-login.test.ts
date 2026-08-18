@@ -33,6 +33,12 @@ vi.mock('@/lib/auth/session', () => ({
   createSession: vi.fn(),
 }))
 
+vi.mock('@/lib/rate-limit', () => ({
+  rateLimit: () => true,
+  loginRateLimitKey: (ip: string, email: string) => `login:${ip}:${email}`,
+  getClientIp: (req: Request) => req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? req.headers.get('x-real-ip') ?? 'unknown',
+}))
+
 describe('POST /api/auth/login', () => {
   beforeEach(() => {
     vi.clearAllMocks()

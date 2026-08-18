@@ -1,22 +1,15 @@
-type Entry<T> = { value: T; expires: number }
+import { getRedisClient } from './redis'
 
-const cache = new Map<string, Entry<unknown>>()
+export async function cached<T>(key: string, factory: () => Promise<T>, ttlMs = 10_000): Promise<T> {
+  const client = getRedisClient()
+  const redisKey = `cache:${key}`
 
-function pruneExpired() {
-  const now = Date.now()
-  for (const [key, entry] of cache) {
-    if (entry.expires <= now) cache.delete(key)
+  const cachedValue = await client.get(redisKey)
+  if (cachedValue !== null) {
+    return JSON.parse(cachedValue) as T
   }
-}
 
-export function cached<T>(key: string, factory: () => Promise<T>, ttlMs = 10_000): Promise<T> {
-  const hit = cache.get(key) as Entry<T> | undefined
-  if (hit && hit.expires > Date.now()) return Promise.resolve(hit.value)
-
-  pruneExpired()
-
-  return factory().then((value) => {
-    cache.set(key, { value, expires: Date.now() + ttlMs })
-    return value
-  })
+  const value = await factory()
+  await client.set(redisKey, JSON.stringify(value), 'PX', ttlMs)
+  return value
 }

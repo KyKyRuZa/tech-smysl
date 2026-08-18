@@ -61,9 +61,9 @@ export function createPutHandler<TData, TEntity extends { id: string }>(
       return NextResponse.json({ error: options.notFoundMessage }, { status: 404 })
     }
 
-    const data = validated.data as unknown as { slug?: string }
-    if (options.slugCheck && typeof data.slug === 'string') {
-      const conflict = await options.slugCheck(data.slug, id)
+    const data = validated.data
+    if (options.slugCheck && typeof (data as { slug?: string }).slug === 'string') {
+      const conflict = await options.slugCheck((data as unknown as { slug: string }).slug, id)
       if (conflict) return conflict
     }
 

@@ -7,6 +7,7 @@ import { NotFoundError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { ensureSlugUnique } from '@/lib/api/helpers'
 import { upsertProjectTranslations } from '@/lib/api/translations'
+import type { Prisma } from '@prisma/client'
 
 export async function GET(req: NextRequest) {
   try {
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
     }
 
     const created = await prisma.project.create({
-      data: projectData as never,
+      data: projectData as Prisma.ProjectCreateInput,
     })
 
     if (translations && (translations.ru || translations.en)) {

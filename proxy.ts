@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { decrypt } from '@/lib/auth/session'
 import { logger } from '@/lib/logger'
-import { locales, defaultLocale, getLocaleFromPath, isValidLocale } from '@/lib/i18n/get-locale'
+import { defaultLocale, getLocaleFromPath, isValidLocale } from '@/lib/i18n/get-locale'
+import { rateLimit } from '@/lib/rate-limit'
 
 const protectedRoutes = ['/admin']
 const publicRoutes = ['/login']
@@ -12,40 +13,6 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
 ]
-
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000
-const RATE_LIMIT_MAX = 100
-
-function getClientIp(req: NextRequest): string {
-  const xfwd = req.headers.get('x-forwarded-for')
-  if (xfwd) {
-    return xfwd.split(',')[0]!.trim()
-  }
-  const xri = req.headers.get('x-real-ip')
-  if (xri) {
-    return xri
-  }
-  return 'unknown'
-}
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(ip)
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW })
-    return true
-  }
-
-  entry.count += 1
-  if (entry.count > RATE_LIMIT_MAX) {
-    return false
-  }
-
-  return true
-}
 
 function getCorsHeaders(req: NextRequest): Record<string, string> {
   const origin = req.headers.get('origin') ?? ''
@@ -112,8 +79,8 @@ export async function proxy(req: NextRequest) {
   }
 
   if (pathname.startsWith('/api/')) {
-    const ip = getClientIp(req)
-    const allowed = checkRateLimit(ip)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? req.headers.get('x-real-ip') ?? 'unknown'
+    const allowed = await rateLimit(ip)
 
     if (!allowed) {
       logger.warn('Rate limit exceeded', { ip, pathname })
@@ -137,10 +104,12 @@ export async function proxy(req: NextRequest) {
   }
 
   const stripped = stripLocale(pathname)
-  const isProtectedRoute = protectedRoutes.some(
-    (route) => stripped === route || stripped.startsWith(`${route}/`)
-  )
   const isPublicRoute = publicRoutes.some((route) => stripped === route)
+  const isProtectedRoute =
+    !isPublicRoute &&
+    protectedRoutes.some(
+      (route) => stripped === route || stripped.startsWith(`${route}/`)
+    )
 
   const session = req.cookies.get('session')?.value
   const payload = decrypt(session)
@@ -161,8 +130,6 @@ export async function proxy(req: NextRequest) {
   const currentLocale = getLocaleFromPath(pathname)
 
   if (!currentLocale) {
-    // Locale-less special routes (admin/login) are served as-is; content
-    // pages get a locale-prefixed redirect so the App Router can resolve them.
     if (isProtectedRoute || isPublicRoute) {
       const res = NextResponse.next()
       applyDocHeaders(res, nonce, corsHeaders)

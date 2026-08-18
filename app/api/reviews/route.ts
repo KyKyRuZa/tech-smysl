@@ -5,6 +5,7 @@ import { reviewSchema } from '@/lib/validation/schemas'
 import { logger } from '@/lib/logger'
 import { validateBody } from '@/lib/auth/middleware'
 import { upsertReviewTranslations } from '@/lib/api/translations'
+import type { Prisma } from '@prisma/client'
 
 export async function GET(req: NextRequest) {
   try {
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     const created = await prisma.review.create({
-      data: baseData as never,
+      data: baseData as Prisma.ReviewCreateInput,
     })
 
     if (translations && (translations.ru || translations.en)) {

@@ -1,6 +1,7 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { getAdminBlogPosts } from '@/lib/admin-queries'
+import Link from 'next/link'
 import RowActions from '@/components/admin/RowActions'
 import styles from '../admin.module.css'
 
@@ -14,17 +15,17 @@ export default async function BlogPostsPage() {
     <div>
       <div className={styles.adminHeader}>
         <h1>Статьи</h1>
-        <a href="/admin/blog-posts/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+        <Link href="/admin/blog-posts/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
           Новая статья
-        </a>
+        </Link>
       </div>
       <div className={styles.adminCard}>
         {posts.length === 0 ? (
           <div className={styles.adminEmpty}>
             <p>Статей пока нет.</p>
-            <a href="/admin/blog-posts/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+            <Link href="/admin/blog-posts/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
               Создать первую статью
-            </a>
+            </Link>
           </div>
         ) : (
           <div className={styles.adminTableWrap}>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import type {
   HeroSlide,
   Project as DbProject,
@@ -252,9 +253,9 @@ export default function VisualEditor({
     <div className={styles.editor}>
       <div className={styles.toolbar}>
         <div>
-          <a href="/admin" className={styles.backLink}>
-            ← В админку
-          </a>
+          <Link href="/admin" className={styles.backLink}>
+             ← В админку
+          </Link>
           <h1 className={styles.title}>Визуальный редактор</h1>
           <p className={styles.subtitle}>
             Страница отрисована как на сайте. Кликните по любому блоку, чтобы открыть настройки. Слайды

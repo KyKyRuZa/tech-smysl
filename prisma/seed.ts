@@ -4,6 +4,10 @@ import { Role } from '@prisma/client'
 import { logger } from '@/lib/logger'
 
 async function main() {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Seed script is not allowed in production.')
+  }
+
   const email = 'admin@techsmysl.ru'
   const password = process.env.DEFAULT_ADMIN_PASSWORD
   if (!password) {

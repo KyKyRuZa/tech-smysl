@@ -32,7 +32,10 @@ describe('i18n: RU/EN completeness parity', () => {
 
   it('every RU string leaf is non-empty', () => {
     for (const key of ruKeys) {
-      const value = key.split('.').reduce<any>((acc, part) => acc?.[part], translations.ru)
+      const value = key.split('.').reduce<unknown>((acc, part) => {
+        const obj = acc as Record<string, unknown>
+        return obj[part] as Record<string, unknown> | string | undefined
+      }, translations.ru)
       if (typeof value === 'string') {
         expect(value.trim().length, `RU key "${key}" must not be empty`).toBeGreaterThan(0)
       }
@@ -41,7 +44,10 @@ describe('i18n: RU/EN completeness parity', () => {
 
   it('every EN string leaf is non-empty', () => {
     for (const key of enKeys) {
-      const value = key.split('.').reduce<any>((acc, part) => acc?.[part], translations.en)
+      const value = key.split('.').reduce<unknown>((acc, part) => {
+        const obj = acc as Record<string, unknown>
+        return obj[part] as Record<string, unknown> | string | undefined
+      }, translations.en)
       if (typeof value === 'string') {
         expect(value.trim().length, `EN key "${key}" must not be empty`).toBeGreaterThan(0)
       }

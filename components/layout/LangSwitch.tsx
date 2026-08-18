@@ -1,8 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import { locales, defaultLocale, isValidLocale } from '@/lib/i18n/get-locale'
+import { defaultLocale, isValidLocale } from '@/lib/i18n/get-locale'
 import styles from './Header.module.css'
 
 function getLocaleFromPath(pathname: string): string | null {
@@ -18,20 +17,13 @@ function setLocaleCookie(locale: string) {
 export default function LangSwitch() {
   const pathname = usePathname()
   const router = useRouter()
-  const [currentLocale, setCurrentLocale] = useState(defaultLocale)
 
-  useEffect(() => {
-    const locale = getLocaleFromPath(pathname)
-    if (locale && isValidLocale(locale)) {
-      setCurrentLocale(locale)
-    } else {
-      const cookie = document.cookie.split('; ').find((row) => row.startsWith('NEXT_LOCALE='))
-      const cookieLocale = cookie?.split('=')[1]
-      if (cookieLocale && isValidLocale(cookieLocale)) {
-        setCurrentLocale(cookieLocale)
-      }
-    }
-  }, [pathname])
+  const localeFromPath = getLocaleFromPath(pathname)
+  const cookieLocale =
+    typeof document !== 'undefined'
+      ? document.cookie.split('; ').find((row) => row.startsWith('NEXT_LOCALE='))?.split('=')[1] ?? null
+      : null
+  const currentLocale = localeFromPath ?? (cookieLocale && isValidLocale(cookieLocale) ? cookieLocale : defaultLocale)
 
   const switchTo = (target: string) => {
     const current = getLocaleFromPath(pathname) ?? currentLocale

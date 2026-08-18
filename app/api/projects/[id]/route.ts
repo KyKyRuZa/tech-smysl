@@ -6,6 +6,7 @@ import { upsertProjectTranslations } from '@/lib/api/translations'
 import { validateBody } from '@/lib/auth/middleware'
 import { requireAuth } from '@/lib/auth/require-auth'
 import { NextRequest, NextResponse } from 'next/server'
+import type { Prisma } from '@prisma/client'
 
 export const GET = createGetHandler(
   (id) => prisma.project.findUnique({ where: { id } }),
@@ -67,7 +68,7 @@ export async function PUT(
 
     const updated = await prisma.project.update({
       where: { id },
-      data: updateData as never,
+      data: updateData as Prisma.ProjectUpdateInput,
     })
 
     if (translations && (translations.ru || translations.en)) {

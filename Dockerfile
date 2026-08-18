@@ -9,6 +9,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Required only for `prisma generate` because prisma.config.ts resolves env('DATABASE_URL').
+# This dummy value is NOT baked into the final image; runtime URL comes from docker-compose.
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+RUN npx prisma generate
 RUN --mount=type=cache,target=/app/.next/cache npm run build
 
 FROM node:24-alpine AS runner

@@ -1,18 +1,19 @@
-type Bucket = { count: number; resetAt: number }
+import { getRedisClient } from './redis'
 
-const store = new Map<string, Bucket>()
+const RATE_LIMIT_WINDOW_SECONDS = 15 * 60
+const DEFAULT_MAX = 100
 
-export function rateLimit(key: string, max: number, windowMs: number): boolean {
-  const now = Date.now()
-  const entry = store.get(key)
+export async function rateLimit(key: string, max = DEFAULT_MAX, windowMs = RATE_LIMIT_WINDOW_SECONDS * 1000): Promise<boolean> {
+  const client = getRedisClient()
+  const ttlSeconds = Math.ceil(windowMs / 1000)
+  const redisKey = `rate-limit:${key}`
 
-  if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs })
-    return true
+  const count = await client.incr(redisKey)
+  if (count === 1) {
+    await client.expire(redisKey, ttlSeconds)
   }
 
-  entry.count += 1
-  return entry.count <= max
+  return count <= max
 }
 
 export function loginRateLimitKey(ip: string, email: string): string {

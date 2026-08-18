@@ -1,6 +1,7 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { getAdminProjects } from '@/lib/admin-queries'
+import Link from 'next/link'
 import RowActions from '@/components/admin/RowActions'
 import styles from '../admin.module.css'
 
@@ -14,17 +15,17 @@ export default async function ProjectsPage() {
     <div>
       <div className={styles.adminHeader}>
         <h1>Проекты</h1>
-        <a href="/admin/projects/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+        <Link href="/admin/projects/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
           Новый проект
-        </a>
+        </Link>
       </div>
       <div className={styles.adminCard}>
         {projects.length === 0 ? (
           <div className={styles.adminEmpty}>
             <p>Проектов пока нет.</p>
-            <a href="/admin/projects/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+            <Link href="/admin/projects/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
               Создать первый проект
-            </a>
+            </Link>
           </div>
         ) : (
           <div className={styles.adminTableWrap}>

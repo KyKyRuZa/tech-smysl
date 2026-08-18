@@ -22,6 +22,10 @@ vi.mock('@/lib/logger', () => ({
   },
 }))
 
+vi.mock('@/lib/rate-limit', () => ({
+  rateLimit: () => true,
+}))
+
 describe('POST /api/applications', () => {
   beforeEach(() => {
     vi.clearAllMocks()

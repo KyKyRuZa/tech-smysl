@@ -6,7 +6,7 @@ services:
     ports:
       - "${APP_PORT:-3000}:3000"
     environment:
-      POSTGRES_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public"
       REDIS_URL: "redis://:${REDIS_PASSWORD}@redis:6379"
       UPLOAD_DIR: /app/public/uploads
       NEXT_PUBLIC_BASE_URL: "${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}"

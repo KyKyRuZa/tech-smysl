@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -17,6 +17,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Reading localStorage on mount is a legitimate pattern
     setCollapsed(window.localStorage.getItem('admin-sidebar-collapsed') === 'true')
   }, [])
+
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [open])
 
   const toggleCollapsed = () => {
     setCollapsed((prev) => {

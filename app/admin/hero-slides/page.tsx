@@ -1,6 +1,7 @@
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { getAdminHeroSlides } from '@/lib/admin-queries'
+import Link from 'next/link'
 import RowActions from '@/components/admin/RowActions'
 import styles from '../admin.module.css'
 
@@ -14,17 +15,17 @@ export default async function HeroSlidesPage() {
     <div>
       <div className={styles.adminHeader}>
         <h1>Слайды</h1>
-        <a href="/admin/hero-slides/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+        <Link href="/admin/hero-slides/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
           Новый слайд
-        </a>
+        </Link>
       </div>
       <div className={styles.adminCard}>
         {slides.length === 0 ? (
           <div className={styles.adminEmpty}>
             <p>Слайдов пока нет.</p>
-            <a href="/admin/hero-slides/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
+            <Link href="/admin/hero-slides/new" className={`${styles.adminBtn} ${styles.adminBtnPrimary}`}>
               Создать первый слайд
-            </a>
+            </Link>
           </div>
         ) : (
           <div className={styles.adminTableWrap}>

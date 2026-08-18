@@ -8,6 +8,7 @@ import { logger } from '@/lib/logger'
 import { blogPostSelect, ensureSlugUnique } from '@/lib/api/helpers'
 import { validateBody } from '@/lib/auth/middleware'
 import { upsertBlogPostTranslations } from '@/lib/api/translations'
+import type { Prisma } from '@prisma/client'
 
 export async function GET(req: NextRequest) {
   try {
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
     }
 
     const created = await prisma.blogPost.create({
-      data: postData as never,
+      data: postData as Prisma.BlogPostCreateInput,
     })
 
     if (translations && (translations.ru || translations.en)) {
